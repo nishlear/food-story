@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geolocation Test</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        #status { margin-bottom: 20px; color: #555; }
+        .coords { font-size: 2em; font-weight: bold; color: #007bff; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>📍 Device Location</h1>
+    <div id="status">Waiting for permission...</div>
+    
+    <div style="margin: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px;">
+        <h3>🔊 Text to Speech</h3>
+        <input type="text" id="ttsInput" placeholder="Type something to say..." style="padding: 8px; width: 60%;">
+        <button onclick="speak(document.getElementById('ttsInput').value)" style="padding: 8px 15px; cursor: pointer;">Speak</button>
+        <br><br>
+        <button onclick="speak('Welcome to the Food Street Audio Guide!')" style="padding: 5px 10px;">Test Welcome</button>
+    </div>
+
+    <div id="result"></div>
+    <script src="/static/script.js"></script>
+</body>
+</html>

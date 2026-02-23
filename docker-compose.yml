@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  geolocation-app:
+    build: .
+    container_name: geolocation-container
+    ports:
+      - "7330:7330"
+    restart: unless-stopped
+    volumes:
+      # Mount the static files so you can change HTML/JS without rebuilding
+      - ./src/static:/app/src/static
