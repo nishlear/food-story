@@ -1,12 +1,41 @@
-version: '3.8'
-
 services:
-  geolocation-app:
-    build: .
-    container_name: geolocation-container
-    ports:
-      - "7330:7330"
-    restart: unless-stopped
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: foodguide
+      POSTGRES_PASSWORD: foodguide
+      POSTGRES_DB: foodguide_db
     volumes:
-      # Mount the static files so you can change HTML/JS without rebuilding
-      - ./src/static:/app/src/static
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foodguide -d foodguide_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: src/backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://foodguide:foodguide@db/foodguide_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,5 @@
+{
+  "name": "Street Food Audio Guide",
+  "description": "A mobile-first prototype for a GPS-triggered audio guide for street food vendors.",
+  "requestFramePermissions": []
+}

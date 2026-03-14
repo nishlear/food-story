@@ -1,16 +1,90 @@
-__pycache__
-.venv
-*.pyc
-*.pyo
-*.pyd
-.db
-.sqlite
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.ENV/
+
+# Python packaging/build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python tooling caches
+.pytest_cache/
+.mypy_cache/
+.pytype/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# SQLite / local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets / env
 .env
-.DS_Store
+.env.*
 *.pem
 *.key
-venv/
-env/
-dist/
-build/
-*.egg-info/
+
+# Node / frontend
+node_modules/
+# Vite/React build output
+src/frontend/dist/
+# generic JS build/cache
+*.tsbuildinfo
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.yarn/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+*.log
+
+# Docker
+*.pid
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDEs/editors
+.vscode/
+.idea/
+*.iml
+
+# Terraform (if ever used)
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Local-only folders
+.claude/
+
+# Project-specific
+AGENTS.md
+CLAUDE.md
