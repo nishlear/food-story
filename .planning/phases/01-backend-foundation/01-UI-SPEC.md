@@ -76,12 +76,12 @@ No custom font is loaded; these sizes are Tailwind defaults.
 | Role | Size | Weight | Line Height | Tailwind Class |
 |------|------|--------|-------------|----------------|
 | Body | 16px | 400 (regular) | 1.5 | `text-base` |
-| Label / Caption | 14px | 500 (medium) | 1.5 | `text-sm font-medium` |
-| Heading | 20px | 700 (bold) | 1.2 | `text-xl font-bold` |
-| Display | 24px | 700 (bold) | 1.2 | `text-2xl font-bold` |
+| Label / Caption | 14px | 400 (regular) | 1.5 | `text-sm` |
+| Heading | 20px | 600 (semibold) | 1.2 | `text-xl font-semibold` |
+| Display | 24px | 600 (semibold) | 1.2 | `text-2xl font-semibold` |
 
-Weight inventory: 2 weights in use — regular (400) and bold/semibold (600–700).
-CTAs use `font-semibold` (600). Headings use `font-bold` (700).
+Weight inventory: 2 weights in use — regular (400) and semibold (600).
+CTAs use `font-semibold` (600). Headings and Display use `font-semibold` (600).
 
 ---
 
