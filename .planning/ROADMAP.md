@@ -58,7 +58,11 @@ Plans:
   2. Admin sees a confirmation prompt ("Place pin here?") before the pin position is committed to the database
   3. Confirmed pin positions are stored as lat/lon (not pixels) and immediately appear on the map at the correct location
   4. Admin cannot enter tap-to-place mode on a street that has no map image attached
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Inverse geo-projection utility (percentToLatLon) with TDD + Express vendor PUT lat/lon fix
+- [ ] 03-02-PLAN.md — MapInterface pin-placement mode, VendorEditModal trigger, App.tsx state machine wiring
 
 ## Progress
 
@@ -69,4 +73,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 1/1 | Complete   | 2026-03-19 |
 | 2. Map View | 2/2 | Complete | 2026-03-20 |
-| 3. Admin Pin Placement | 0/? | Not started | - |
+| 3. Admin Pin Placement | 0/2 | Not started | - |
