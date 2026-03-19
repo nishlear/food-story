@@ -45,7 +45,7 @@ Exceptions:
 - FAB buttons: 48px (w-12 h-12) touch target — exceeds standard grid, required for mobile tap target (WCAG 2.5.5 minimum 44px)
 - Zoom +/- buttons: 48px (w-12 h-12) — same FAB pattern, same exception
 - FAB column gap: 12px (gap-3) — established pattern, preserved as-is
-- Bottom sheet drag handle: 6px height (h-1.5) — decorative, not grid-bound
+- Bottom sheet drag handle: 4px height (h-1) — decorative element, minimum visible handle
 - Source: existing MapInterface.tsx and VendorBottomSheet.tsx patterns
 
 ---
@@ -55,7 +55,7 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 regular | 1.5 |
-| Label | 14px (text-sm) | 500 medium | 1.2 |
+| Label | 14px (text-sm) | 400 regular | 1.2 |
 | Heading | 20px (text-xl or text-2xl = 24px for sheet title) | 700 bold | 1.2 |
 | Pin tooltip | 12px (text-xs) | 400 regular | 1.0 (single line) |
 
@@ -63,16 +63,15 @@ Precise sizes in use (source: existing components):
 - 12px — pin name tooltip, star rating sub-labels
 - 14px — bottom sheet body text, address line, vendor type, vendor rating sub-count
 - 24px — bottom sheet vendor name heading (text-2xl font-bold)
-- 19px — location label in map (text-sm font-medium, 14px, but elevated by font-medium)
 
 Active sizes for Phase 2 additions:
 - Zoom control buttons: no text label (icon-only, 24px lucide icon)
 - Map image loading spinner/skeleton: no text
 - Pin tooltip: 12px, weight 400
-- Location label chip: 14px, weight 500
+- Location label chip: 14px, weight 400
 
-Weights declared: 400 (regular), 500 (medium), 700 (bold).
-Note: per template constraint of 2 weights max — primary weights are 400 and 700. Weight 500 (font-medium) is used only for the location chip label and is a pre-existing pattern in the codebase.
+Weights declared: 400 (regular), 700 (bold).
+Note: The existing codebase uses `font-medium` (500) on the location chip label. The implementation may retain the existing Tailwind class; however, weight 500 is not declared as a spec tier. The spec governs new work — weight 400 and 700 are the two authoritative tiers.
 
 ---
 
@@ -174,7 +173,7 @@ Source: CONTEXT.md MapInterface Refactor Strategy
 | Zoom out button | (no text label — icon only, aria-label="Zoom out") |
 | Empty state heading | Not applicable — no map means vendor list shows (existing path, no copy change) |
 | Empty state body | Not applicable — same as above |
-| Error state (img load fail) | "Map unavailable" — show in place of skeleton, text-sm text-gray-500, centered in map container |
+| Error state (img load fail) | "Map failed to load. Refresh to retry." — show in place of skeleton, text-sm text-gray-500, centered in map container |
 | Destructive confirmation | None — no destructive actions in Phase 2 |
 | Location chip | `{location.name}` — dynamic value, no change to existing pattern |
 | Pin tooltip | `{vendor.name}` — dynamic value, existing pattern |
