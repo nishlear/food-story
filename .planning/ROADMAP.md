@@ -13,7 +13,7 @@ This milestone adds an interactive map layer to the existing food street vendor 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Foundation** - DB schema migrations + map generation endpoint + static image serving (completed 2026-03-19)
-- [ ] **Phase 2: Map View** - MapView component with vendor pins, zoom/pan, conditional rendering, and pin interactions
+- [x] **Phase 2: Map View** - MapView component with vendor pins, zoom/pan, conditional rendering, and pin interactions (completed 2026-03-20)
 - [ ] **Phase 3: Admin Pin Placement** - Admin tap-to-place vendor pin workflow with confirmation
 
 ## Phase Details
@@ -43,11 +43,11 @@ Plans:
   3. Vendor pins appear at their correct geographic positions on the map, and positions remain accurate regardless of zoom level or display size
   4. Tapping a vendor pin opens the existing vendor detail bottom sheet for that vendor
   5. Streets without a map image continue to show the existing vendor list UI unchanged
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 02-01-PLAN.md — Test infrastructure (vitest) and geo-projection utility with tests
-- [ ] 02-02-PLAN.md — MapInterface refactor: real map, zoom/pan, geo-projected pins, pin interactions, fallback
+- [x] 02-01-PLAN.md — Test infrastructure (vitest) and geo-projection utility with tests
+- [x] 02-02-PLAN.md — MapInterface refactor: real map, zoom/pan, geo-projected pins, pin interactions, fallback
 
 ### Phase 3: Admin Pin Placement
 **Goal**: Admins can tap anywhere on the street map image to set a vendor's geographic location — with a confirmation step before saving — giving admins a visual, intuitive workflow for positioning vendor stalls
@@ -68,5 +68,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 1/1 | Complete   | 2026-03-19 |
-| 2. Map View | 0/2 | Planning complete | - |
+| 2. Map View | 2/2 | Complete | 2026-03-20 |
 | 3. Admin Pin Placement | 0/? | Not started | - |
