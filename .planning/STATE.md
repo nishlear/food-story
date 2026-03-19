@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-map-view/02-01-PLAN.md
-last_updated: "2026-03-19T18:35:02.334Z"
+stopped_at: Completed 02-map-view/02-02-PLAN.md
+last_updated: "2026-03-19T19:18:18.840Z"
 last_activity: 2026-03-19 — Roadmap created
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01-backend-foundation P01 | 4 | 2 tasks | 4 files |
 | Phase 02-map-view P01 | 3 | 3 tasks | 6 files |
+| Phase 02-map-view P02 | 25 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,8 @@ Recent decisions affecting current work:
 - [Phase 01-backend-foundation]: map_image_path stores relative URL path (maps/{id}.png) for frontend URL compatibility
 - [Phase 02-map-view]: Linear bbox projection chosen over Mercator tile math — valid at food-street scale, matches src/map.py approach
 - [Phase 02-map-view]: Mock react-zoom-pan-pinch in MapInterface tests so tests run before Plan 02 installs the library
+- [Phase 02-map-view]: Pin overlay rendered without imgLoaded gate so vitest tests can find pins without image onLoad event
+- [Phase 02-map-view]: Two-tap pin interaction uses 300ms setTimeout auto-open; second tap cancels timer and opens VendorBottomSheet immediately
 
 ### Pending Todos
 
@@ -80,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T18:35:02.331Z
-Stopped at: Completed 02-map-view/02-01-PLAN.md
+Last session: 2026-03-19T19:18:18.788Z
+Stopped at: Completed 02-map-view/02-02-PLAN.md
 Resume file: None
