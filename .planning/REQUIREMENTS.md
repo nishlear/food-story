@@ -52,8 +52,8 @@
 |-------------|-------|--------|
 | MSET-01 | Phase 1 | Pending |
 | MSET-02 | Phase 1 | Pending |
-| MSET-03 | Phase 2 | Pending |
-| MSET-04 | Phase 2 | Pending |
+| MSET-03 | Phase 3 | Pending |
+| MSET-04 | Phase 3 | Pending |
 | MVIEW-01 | Phase 2 | Pending |
 | MVIEW-02 | Phase 2 | Pending |
 | MVIEW-03 | Phase 2 | Pending |
@@ -69,4 +69,4 @@
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-19 after roadmap creation*
