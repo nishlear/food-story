@@ -28,7 +28,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The street API response includes a `map_image_path` field when a map exists, and the image is accessible via a static file URL
   4. Streets without a bounding box continue to load and display normally (no regressions)
   5. All new backend routes exist in both `server.ts` and `main.py`
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Schema migrations, map generation, and static file serving (both backends)
 
 ### Phase 2: Map View
 **Goal**: Users at a food street with a map see the map as the primary full-screen experience — with vendor pins at their correct geographic positions, zoom/pan controls, and pin-tap interaction wired to the existing bottom sheet
@@ -60,6 +63,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/? | Not started | - |
+| 1. Backend Foundation | 0/1 | Not started | - |
 | 2. Map View | 0/? | Not started | - |
 | 3. Admin Pin Placement | 0/? | Not started | - |
