@@ -7,8 +7,8 @@
 
 ### Map Setup (Admin)
 
-- [ ] **MSET-01**: Admin can add NW and SE lat/lon bounding box coordinates to a street (during create or edit)
-- [ ] **MSET-02**: System generates a static map PNG from OpenStreetMap tiles when a street's bbox is saved
+- [x] **MSET-01**: Admin can add NW and SE lat/lon bounding box coordinates to a street (during create or edit)
+- [x] **MSET-02**: System generates a static map PNG from OpenStreetMap tiles when a street's bbox is saved
 - [ ] **MSET-03**: Admin can tap on the street's map image to place a vendor pin; position is stored as lat/lon
 - [ ] **MSET-04**: Admin sees a confirmation step ("Place pin here?") before a vendor pin position is saved
 
@@ -50,8 +50,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MSET-01 | Phase 1 | Pending |
-| MSET-02 | Phase 1 | Pending |
+| MSET-01 | Phase 1 | Complete |
+| MSET-02 | Phase 1 | Complete |
 | MSET-03 | Phase 3 | Pending |
 | MSET-04 | Phase 3 | Pending |
 | MVIEW-01 | Phase 2 | Pending |

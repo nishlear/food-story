@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-03-19T10:15:17.452Z"
+stopped_at: Completed 01-backend-foundation 01-01-PLAN.md
+last_updated: "2026-03-19T11:14:12.681Z"
 last_activity: 2026-03-19 — Roadmap created
 progress:
   total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -50,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01-backend-foundation P01 | 4 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Recent decisions affecting current work:
 - Server-side map generation via staticmap — reuses existing map.py logic; no client tile rendering
 - Map as primary view — when a street has a map, the map IS the street experience (not a tab)
 - Tap-to-place vendor pins (admin) — more intuitive than manual lat/lon entry
+- [Phase 01-backend-foundation]: Express subprocess uses uv venv python3 not system python3 — staticmap only in project venv
+- [Phase 01-backend-foundation]: map_image_path stores relative URL path (maps/{id}.png) for frontend URL compatibility
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T10:15:17.445Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-backend-foundation/01-CONTEXT.md
+Last session: 2026-03-19T11:14:12.679Z
+Stopped at: Completed 01-backend-foundation 01-01-PLAN.md
+Resume file: None

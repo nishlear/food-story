@@ -12,7 +12,7 @@ This milestone adds an interactive map layer to the existing food street vendor 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Backend Foundation** - DB schema migrations + map generation endpoint + static image serving
+- [x] **Phase 1: Backend Foundation** - DB schema migrations + map generation endpoint + static image serving (completed 2026-03-19)
 - [ ] **Phase 2: Map View** - MapView component with vendor pins, zoom/pan, conditional rendering, and pin interactions
 - [ ] **Phase 3: Admin Pin Placement** - Admin tap-to-place vendor pin workflow with confirmation
 
@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The street API response includes a `map_image_path` field when a map exists, and the image is accessible via a static file URL
   4. Streets without a bounding box continue to load and display normally (no regressions)
   5. All new backend routes exist in both `server.ts` and `main.py`
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Schema migrations, map generation, and static file serving (both backends)
@@ -63,6 +63,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/1 | Not started | - |
+| 1. Backend Foundation | 1/1 | Complete   | 2026-03-19 |
 | 2. Map View | 0/? | Not started | - |
 | 3. Admin Pin Placement | 0/? | Not started | - |
