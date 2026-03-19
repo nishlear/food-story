@@ -279,9 +279,9 @@ app.put('/api/streets/:streetId/vendors/:vendorId', (req, res) => {
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 
   if (authUser.role === 'admin') {
-    const { name, description, images, owner_username, rating, reviews, x, y, type, address } = req.body;
-    db.prepare('UPDATE vendors SET name = ?, description = ?, images = ?, owner_username = ?, rating = ?, reviews = ?, x = ?, y = ?, type = ?, address = ? WHERE id = ?')
-      .run(name, description, JSON.stringify(images || []), owner_username || null, rating, reviews, x, y, type, address, req.params.vendorId);
+    const { name, description, images, owner_username, rating, reviews, x, y, type, address, lat, lon } = req.body;
+    db.prepare('UPDATE vendors SET name = ?, description = ?, images = ?, owner_username = ?, rating = ?, reviews = ?, x = ?, y = ?, type = ?, address = ?, lat = ?, lon = ? WHERE id = ?')
+      .run(name, description, JSON.stringify(images || []), owner_username || null, rating, reviews, x, y, type, address, lat ?? null, lon ?? null, req.params.vendorId);
     return res.json({ success: true });
   }
 
