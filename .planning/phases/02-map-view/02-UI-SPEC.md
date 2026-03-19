@@ -34,7 +34,7 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4px | Icon gaps, inline padding (e.g. pin tooltip px-2 py-1) |
-| sm | 8px | Compact element spacing (e.g. gap-3 between FAB buttons maps to 12px — nearest sm/md boundary) |
+| sm | 8px | Compact element spacing (e.g. gap-2 between FAB buttons) |
 | md | 16px | Default element spacing (e.g. map container padding left-4 = 16px) |
 | lg | 24px | Bottom sheet section padding (px-6 = 24px) |
 | xl | 32px | — |
@@ -44,7 +44,7 @@ Declared values (must be multiples of 4):
 Exceptions:
 - FAB buttons: 48px (w-12 h-12) touch target — exceeds standard grid, required for mobile tap target (WCAG 2.5.5 minimum 44px)
 - Zoom +/- buttons: 48px (w-12 h-12) — same FAB pattern, same exception
-- FAB column gap: 12px (gap-3) — established pattern, preserved as-is
+- FAB column gap: 8px (gap-2) — standard sm token
 - Bottom sheet drag handle: 4px height (h-1) — decorative element, minimum visible handle
 - Source: existing MapInterface.tsx and VendorBottomSheet.tsx patterns
 
