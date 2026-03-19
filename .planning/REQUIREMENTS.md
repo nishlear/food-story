@@ -14,16 +14,16 @@
 
 ### Map View (User)
 
-- [ ] **MVIEW-01**: When a street has a map, the map is the primary full-screen view (replaces vendor list)
-- [ ] **MVIEW-02**: User can pinch-to-zoom and pan the map
-- [ ] **MVIEW-03**: Streets without a map attached continue to show the existing vendor list UI
-- [ ] **MVIEW-04**: Vendor pins appear at their correct geographic positions on the map (lat/lon projected to pixels)
-- [ ] **MVIEW-05**: Vendor pin positions remain geographically accurate regardless of map zoom or display size
+- [x] **MVIEW-01**: When a street has a map, the map is the primary full-screen view (replaces vendor list)
+- [x] **MVIEW-02**: User can pinch-to-zoom and pan the map
+- [x] **MVIEW-03**: Streets without a map attached continue to show the existing vendor list UI
+- [x] **MVIEW-04**: Vendor pins appear at their correct geographic positions on the map (lat/lon projected to pixels)
+- [x] **MVIEW-05**: Vendor pin positions remain geographically accurate regardless of map zoom or display size
 
 ### Interaction
 
-- [ ] **INT-01**: Tapping a vendor pin slides up the existing vendor detail bottom sheet
-- [ ] **INT-02**: Vendors without a placed pin are not shown on the map (but remain accessible via list fallback)
+- [x] **INT-01**: Tapping a vendor pin slides up the existing vendor detail bottom sheet
+- [x] **INT-02**: Vendors without a placed pin are not shown on the map (but remain accessible via list fallback)
 
 ## v2 Requirements
 
@@ -54,13 +54,13 @@
 | MSET-02 | Phase 1 | Complete |
 | MSET-03 | Phase 3 | Pending |
 | MSET-04 | Phase 3 | Pending |
-| MVIEW-01 | Phase 2 | Pending |
-| MVIEW-02 | Phase 2 | Pending |
-| MVIEW-03 | Phase 2 | Pending |
-| MVIEW-04 | Phase 2 | Pending |
-| MVIEW-05 | Phase 2 | Pending |
-| INT-01 | Phase 2 | Pending |
-| INT-02 | Phase 2 | Pending |
+| MVIEW-01 | Phase 2 | Complete |
+| MVIEW-02 | Phase 2 | Complete |
+| MVIEW-03 | Phase 2 | Complete |
+| MVIEW-04 | Phase 2 | Complete |
+| MVIEW-05 | Phase 2 | Complete |
+| INT-01 | Phase 2 | Complete |
+| INT-02 | Phase 2 | Complete |
 
 **Coverage:**
 - v1 requirements: 11 total

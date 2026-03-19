@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-19T11:31:38.493Z"
+stopped_at: Completed 02-map-view/02-01-PLAN.md
+last_updated: "2026-03-19T18:35:02.334Z"
 last_activity: 2026-03-19 — Roadmap created
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_plans: 3
+  completed_plans: 2
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-backend-foundation P01 | 4 | 2 tasks | 4 files |
+| Phase 02-map-view P01 | 3 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ Recent decisions affecting current work:
 - Tap-to-place vendor pins (admin) — more intuitive than manual lat/lon entry
 - [Phase 01-backend-foundation]: Express subprocess uses uv venv python3 not system python3 — staticmap only in project venv
 - [Phase 01-backend-foundation]: map_image_path stores relative URL path (maps/{id}.png) for frontend URL compatibility
+- [Phase 02-map-view]: Linear bbox projection chosen over Mercator tile math — valid at food-street scale, matches src/map.py approach
+- [Phase 02-map-view]: Mock react-zoom-pan-pinch in MapInterface tests so tests run before Plan 02 installs the library
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T11:31:38.490Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-map-view/02-CONTEXT.md
+Last session: 2026-03-19T18:35:02.331Z
+Stopped at: Completed 02-map-view/02-01-PLAN.md
+Resume file: None
