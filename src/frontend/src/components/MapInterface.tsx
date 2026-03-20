@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, ChevronLeft, Settings, Globe, Plus, Minus } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import { projectVendorToPercent } from '../utils/geoProjection';
+import { projectVendorToPercent, percentToLatLon } from '../utils/geoProjection';
 import { CurrentUser } from '../types';
 
 interface Props {
@@ -16,9 +16,16 @@ interface Props {
   onAddVendorClick: () => void;
   onMapClick: (coords: { x: number; y: number }) => void;
   currentUser: CurrentUser | null;
+  // Pin placement props
+  pinPlacementMode?: boolean;
+  onPinPlacementTap?: (lat: number, lon: number) => void;
+  candidatePin?: { lat: number; lon: number } | null;
+  onConfirmPin?: () => void;
+  onCancelPin?: () => void;
+  pinPlacementVendorName?: string;
 }
 
-export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser }: Props) {
+export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -76,6 +83,20 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
     }
   };
 
+  const handlePinOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPct = ((e.clientX - rect.left) / rect.width) * 100;
+    const yPct = ((e.clientY - rect.top) / rect.height) * 100;
+    if (!location?.lat_nw) return;
+    const { lat, lon } = percentToLatLon(
+      location.lat_nw, location.lon_nw,
+      location.lat_se, location.lon_se,
+      xPct, yPct
+    );
+    onPinPlacementTap?.(lat, lon);
+  };
+
   return (
     <motion.div
       ref={mapRef}
@@ -119,7 +140,10 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                       draggable={false}
                     />
                     {/* Pin overlay — rendered regardless of imgLoaded so pins are accessible */}
-                    <div className="absolute inset-0">
+                    <div
+                      className={`absolute inset-0 ${pinPlacementMode ? 'cursor-crosshair' : ''}`}
+                      onClick={pinPlacementMode ? handlePinOverlayClick : undefined}
+                    >
                       {pinnedVendors.map((vendor: any) => {
                           const { x, y } = projectVendorToPercent(
                             location.lat_nw, location.lon_nw,
@@ -149,11 +173,69 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                             </button>
                           );
                         })}
+
+                      {/* Candidate pin — shown when admin has tapped to place */}
+                      {candidatePin && (() => {
+                        const { x, y } = projectVendorToPercent(
+                          location.lat_nw, location.lon_nw,
+                          location.lat_se, location.lon_se,
+                          candidatePin.lat, candidatePin.lon
+                        );
+                        return (
+                          <div
+                            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                            style={{ top: `${y}%`, left: `${x}%` }}
+                            data-testid="candidate-pin"
+                          >
+                            <div className="relative">
+                              <div className="w-10 h-10 rounded-full bg-orange-500 border-2 border-white flex items-center justify-center shadow-md text-white">
+                                <MapPin className="w-5 h-5" />
+                              </div>
+                              <div className="absolute inset-0 rounded-full bg-orange-400 animate-ping opacity-50" />
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </TransformComponent>
 
-                {/* Right FAB column — zoom buttons added below Settings and Globe */}
+                {/* Instruction banner — shown when in pin placement mode with no candidate yet */}
+                {pinPlacementMode && !candidatePin && (
+                  <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-white/50 text-sm text-gray-700 whitespace-nowrap">
+                      Tap the map to place pin{pinPlacementVendorName ? ` for ${pinPlacementVendorName}` : ''}
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirmation overlay — shown when candidate pin is set */}
+                {candidatePin && (
+                  <div className="absolute bottom-16 left-4 right-4 z-40">
+                    <div className="bg-white rounded-2xl shadow-xl p-4 flex flex-col gap-3">
+                      <p className="font-semibold text-gray-900 text-center">Place pin here?</p>
+                      {pinPlacementVendorName && (
+                        <p className="text-sm text-gray-500 text-center">{pinPlacementVendorName}</p>
+                      )}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={onCancelPin}
+                          className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-semibold text-sm hover:bg-gray-200 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={onConfirmPin}
+                          className="flex-1 py-2.5 rounded-xl bg-orange-500 text-white font-semibold text-sm hover:bg-orange-600 transition-colors shadow-md shadow-orange-500/20"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Top-right FAB column — settings & globe */}
                 <div className="absolute right-4 top-4 z-30 flex flex-col gap-3">
                   <button
                     onClick={onOpenSettings}
@@ -168,6 +250,20 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                   >
                     <Globe className="w-6 h-6" />
                   </button>
+                  {canAddVendor && (
+                    <button
+                      onClick={undefined}
+                      disabled={true}
+                      aria-label="Add vendor"
+                      className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors opacity-50 cursor-not-allowed bg-white text-gray-700"
+                    >
+                      <Plus className="w-6 h-6" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Bottom-right FAB column — zoom buttons */}
+                <div className="absolute right-4 bottom-16 z-30 flex flex-col gap-3">
                   <button
                     onClick={() => zoomIn()}
                     aria-label="Zoom in"
@@ -182,16 +278,6 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                   >
                     <Minus className="w-5 h-5" />
                   </button>
-                  {canAddVendor && (
-                    <button
-                      onClick={undefined}
-                      disabled={true}
-                      aria-label="Add vendor"
-                      className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors opacity-50 cursor-not-allowed bg-white text-gray-700"
-                    >
-                      <Plus className="w-6 h-6" />
-                    </button>
-                  )}
                 </div>
               </>
             )}
