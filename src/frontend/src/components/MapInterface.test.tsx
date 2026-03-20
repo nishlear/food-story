@@ -32,6 +32,13 @@ const BASE_PROPS = {
   onAddVendorClick: vi.fn(),
   onMapClick: vi.fn(),
   currentUser: null,
+  // New pin placement props — safe defaults
+  pinPlacementMode: false,
+  onPinPlacementTap: vi.fn(),
+  candidatePin: null,
+  onConfirmPin: vi.fn(),
+  onCancelPin: vi.fn(),
+  pinPlacementVendorName: undefined,
 };
 
 const LOCATION_WITH_MAP = {
@@ -140,5 +147,89 @@ describe('MapInterface — INT-01: pin tap auto-opens bottom sheet after 300ms',
     fireEvent.click(pin);
     fireEvent.click(pin);
     expect(onSelectVendor).toHaveBeenCalledWith(pinnedVendors[0]);
+  });
+});
+
+describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
+  it('shows instruction banner when pinPlacementMode=true and candidatePin=null', () => {
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={LOCATION_WITH_MAP}
+        pinPlacementMode={true}
+        candidatePin={null}
+        pinPlacementVendorName="Nasi Lemak Stall"
+      />
+    );
+    expect(screen.getByText(/Tap the map/i)).toBeInTheDocument();
+  });
+
+  it('includes vendor name in instruction banner', () => {
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={LOCATION_WITH_MAP}
+        pinPlacementMode={true}
+        candidatePin={null}
+        pinPlacementVendorName="Nasi Lemak Stall"
+      />
+    );
+    expect(screen.getByText(/Nasi Lemak Stall/i)).toBeInTheDocument();
+  });
+
+  it('shows confirmation overlay when candidatePin is set', () => {
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={LOCATION_WITH_MAP}
+        pinPlacementMode={true}
+        candidatePin={{ lat: 3.1468, lon: 101.7098 }}
+        pinPlacementVendorName="Nasi Lemak Stall"
+      />
+    );
+    expect(screen.getByText('Place pin here?')).toBeInTheDocument();
+  });
+
+  it('calls onConfirmPin when Confirm button is clicked', () => {
+    const onConfirmPin = vi.fn();
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={LOCATION_WITH_MAP}
+        pinPlacementMode={true}
+        candidatePin={{ lat: 3.1468, lon: 101.7098 }}
+        onConfirmPin={onConfirmPin}
+      />
+    );
+    fireEvent.click(screen.getByText('Confirm'));
+    expect(onConfirmPin).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onCancelPin when Cancel button is clicked', () => {
+    const onCancelPin = vi.fn();
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={LOCATION_WITH_MAP}
+        pinPlacementMode={true}
+        candidatePin={{ lat: 3.1468, lon: 101.7098 }}
+        onCancelPin={onCancelPin}
+      />
+    );
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(onCancelPin).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show instruction banner or confirmation overlay when hasMap=false', () => {
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={BASE_PROPS.location}
+        pinPlacementMode={true}
+        candidatePin={null}
+      />
+    );
+    expect(screen.queryByText(/Tap the map/i)).toBeNull();
+    expect(screen.queryByText('Place pin here?')).toBeNull();
   });
 });
