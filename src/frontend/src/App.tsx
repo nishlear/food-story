@@ -10,11 +10,14 @@ import AddLocationModal from './components/AddLocationModal';
 import EditLocationModal from './components/EditLocationModal';
 import DeleteLocationModal from './components/DeleteLocationModal';
 import AddVendorModal from './components/AddVendorModal';
+import AdminScreen from './components/AdminScreen';
 import { motion } from 'motion/react';
+
+type Screen = 'login' | 'location' | 'map' | 'admin';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [currentScreen, setCurrentScreen] = useState<'login' | 'location' | 'map'>('login');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('login');
 
   const [locations, setLocations] = useState<any[]>([]);
   const [vendors, setVendors] = useState<any[]>([]);
@@ -29,6 +32,10 @@ export default function App() {
   const [isAddingVendor, setIsAddingVendor] = useState(false);
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
   const [newVendorCoords, setNewVendorCoords] = useState<{ x: number; y: number } | null>(null);
+
+  const [pinPlacementMode, setPinPlacementMode] = useState(false);
+  const [pinPlacementVendor, setPinPlacementVendor] = useState<any>(null);
+  const [candidatePin, setCandidatePin] = useState<{ lat: number; lon: number } | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [textSize, setTextSize] = useState(16);
@@ -127,6 +134,55 @@ export default function App() {
     setIsAddVendorModalOpen(true);
   };
 
+  const handleExitPinPlacement = () => {
+    setPinPlacementMode(false);
+    setPinPlacementVendor(null);
+    setCandidatePin(null);
+  };
+
+  const handleSetPinLocation = (vendor: any) => {
+    setSelectedVendor(null);           // close bottom sheet
+    setPinPlacementVendor(vendor);
+    setPinPlacementMode(true);
+    showToast('Tap the map to place pin');
+  };
+
+  const handlePinPlacementTap = (lat: number, lon: number) => {
+    setCandidatePin({ lat, lon });
+  };
+
+  const handleConfirmPin = async () => {
+    if (!candidatePin || !pinPlacementVendor || !selectedLocation) return;
+    try {
+      await fetch(`/api/streets/${selectedLocation.id}/vendors/${pinPlacementVendor.id}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          ...pinPlacementVendor,
+          lat: candidatePin.lat,
+          lon: candidatePin.lon,
+        }),
+      });
+      const res = await fetch(`/api/streets/${selectedLocation.id}/vendors`, {
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      setVendors(data);
+      showToast('Pin location saved');
+    } catch {
+      showToast('Failed to save pin location');
+    } finally {
+      setPinPlacementMode(false);
+      setPinPlacementVendor(null);
+      setCandidatePin(null);
+    }
+  };
+
+  const handleCancelPin = () => {
+    setCandidatePin(null);
+    // Keep pinPlacementMode=true so admin can re-tap
+  };
+
   const handleAddVendor = async (newVendor: any) => {
     try {
       await fetch(`/api/streets/${selectedLocation.id}/vendors`, {
@@ -166,6 +222,7 @@ export default function App() {
             onDeleteClick={(loc) => setDeletingLocation(loc)}
             currentUser={currentUser}
             onLogout={handleLogout}
+            onGoToAdmin={() => setCurrentScreen('admin')}
           />
         )}
         {currentScreen === 'map' && (
@@ -177,6 +234,7 @@ export default function App() {
               setCurrentScreen('location');
               setSelectedVendor(null);
               setIsAddingVendor(false);
+              handleExitPinPlacement();
             }}
             onOpenSettings={() => setIsSettingsOpen(true)}
             onSelectVendor={setSelectedVendor}
@@ -185,6 +243,20 @@ export default function App() {
             onAddVendorClick={handleAddVendorClick}
             onMapClick={handleMapClick}
             currentUser={currentUser}
+            pinPlacementMode={pinPlacementMode}
+            onPinPlacementTap={handlePinPlacementTap}
+            candidatePin={candidatePin}
+            onConfirmPin={handleConfirmPin}
+            onCancelPin={handleCancelPin}
+            pinPlacementVendorName={pinPlacementVendor?.name}
+          />
+        )}
+        {currentScreen === 'admin' && (
+          <AdminScreen
+            key="admin"
+            currentUser={currentUser}
+            onBack={() => setCurrentScreen('location')}
+            authHeaders={authHeaders}
           />
         )}
       </AnimatePresence>
@@ -227,12 +299,22 @@ export default function App() {
         setAudioEnabled={setAudioEnabled}
         textSize={textSize}
         setTextSize={setTextSize}
+        currentUser={currentUser}
+        authHeaders={authHeaders}
       />
 
       <VendorBottomSheet
         vendor={selectedVendor}
         onClose={() => setSelectedVendor(null)}
         onShare={() => showToast('Link copied to clipboard!')}
+        currentUser={currentUser}
+        authHeaders={authHeaders}
+        hasMap={!!(selectedLocation?.map_image_path &&
+                   selectedLocation?.lat_nw != null &&
+                   selectedLocation?.lon_nw != null &&
+                   selectedLocation?.lat_se != null &&
+                   selectedLocation?.lon_se != null)}
+        onSetPinLocation={handleSetPinLocation}
       />
 
       {/* Toast */}

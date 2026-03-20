@@ -1,26 +1,50 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Star, Navigation, Share2, X } from 'lucide-react';
+import { MapPin, Star, Navigation, Share2, X, Edit2 } from 'lucide-react';
+import { CurrentUser, Comment } from '../types';
+import VendorRateForm from './VendorRateForm';
+import VendorCommentsList from './VendorCommentsList';
+import VendorEditModal from './VendorEditModal';
 
 interface Props {
   vendor: any;
   onClose: () => void;
   onShare: () => void;
+  currentUser: CurrentUser | null;
+  authHeaders: () => Record<string, string>;
+  hasMap?: boolean;
+  onSetPinLocation?: (vendor: any) => void;
 }
 
-export default function VendorBottomSheet({ vendor, onClose, onShare }: Props) {
+export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (vendor) setIsExpanded(false);
+    if (vendor) {
+      setIsExpanded(false);
+      fetchComments();
+    }
   }, [vendor]);
+
+  const fetchComments = () => {
+    if (!vendor) return;
+    fetch(`/api/vendors/${vendor.id}/comments`, { headers: authHeaders() })
+      .then(res => res.json())
+      .then(data => Array.isArray(data) ? setComments(data) : setComments([]))
+      .catch(() => setComments([]));
+  };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (e.currentTarget.scrollTop > 50 && !isExpanded) {
       setIsExpanded(true);
     }
   };
+
+  const isOwner = currentUser?.role === 'foodvendor' && vendor?.owner_username === currentUser?.username;
+  const canEdit = currentUser?.role === 'admin' || isOwner;
 
   return (
     <AnimatePresence>
@@ -57,9 +81,9 @@ export default function VendorBottomSheet({ vendor, onClose, onShare }: Props) {
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex items-center text-orange-500">
                     <Star className="w-4 h-4 fill-current" />
-                    <span className="ml-1 font-semibold">{vendor.rating}</span>
+                    <span className="ml-1 font-semibold">{vendor.rating || 0}</span>
                   </div>
-                  <span className="text-gray-400 text-sm">({vendor.reviews})</span>
+                  <span className="text-gray-400 text-sm">({vendor.reviews || 0})</span>
                   <span className="text-gray-300">•</span>
                   <span className="text-gray-500 text-sm capitalize">{vendor.type}</span>
                 </div>
@@ -68,9 +92,19 @@ export default function VendorBottomSheet({ vendor, onClose, onShare }: Props) {
                   <span className="truncate">{vendor.address}</span>
                 </div>
               </div>
-              <button onClick={onClose} className="p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 flex-shrink-0 self-start">
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0 self-start">
+                {canEdit && (
+                  <button
+                    onClick={() => setIsEditOpen(true)}
+                    className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+                <button onClick={onClose} className="p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Action Buttons */}
@@ -111,36 +145,51 @@ export default function VendorBottomSheet({ vendor, onClose, onShare }: Props) {
               <div className="py-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">About</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  A legendary spot known for its authentic flavors and secret family recipes passed down through generations. The aroma alone is enough to draw a crowd from blocks away.
+                  {vendor.description || 'A legendary spot known for its authentic flavors and secret family recipes passed down through generations. The aroma alone is enough to draw a crowd from blocks away.'}
                 </p>
               </div>
 
-              <div className="py-4 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Comments</h3>
-                <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="bg-gray-50 p-4 rounded-2xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-gray-800">FoodieExplorer{i}</span>
-                        <div className="flex text-orange-400">
-                          <Star className="w-3 h-3 fill-current" />
-                          <Star className="w-3 h-3 fill-current" />
-                          <Star className="w-3 h-3 fill-current" />
-                          <Star className="w-3 h-3 fill-current" />
-                          <Star className="w-3 h-3 fill-current" />
-                        </div>
-                      </div>
-                      <p className="text-gray-600 text-sm">
-                        Absolutely incredible! The best {vendor.type} I've had in the city. Worth the wait in line.
-                      </p>
-                    </div>
-                  ))}
+              {/* Rate Form */}
+              {currentUser && (
+                <div className="py-4 border-t border-gray-100">
+                  <VendorRateForm
+                    vendorId={vendor.id}
+                    authHeaders={authHeaders}
+                    onSubmitted={fetchComments}
+                  />
                 </div>
+              )}
+
+              <div className="py-4 border-t border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Reviews</h3>
+                <VendorCommentsList
+                  comments={comments}
+                  currentUser={currentUser}
+                  vendorId={vendor.id}
+                  authHeaders={authHeaders}
+                  onDeleted={fetchComments}
+                />
               </div>
 
               <div className="h-20" />
             </div>
           </motion.div>
+
+          {canEdit && (
+            <VendorEditModal
+              isOpen={isEditOpen}
+              onClose={() => setIsEditOpen(false)}
+              vendor={vendor}
+              streetId={vendor.street_id}
+              authHeaders={authHeaders}
+              onUpdated={() => {
+                setIsEditOpen(false);
+              }}
+              hasMap={hasMap}
+              currentUser={currentUser}
+              onSetPinLocation={onSetPinLocation ? () => onSetPinLocation(vendor) : undefined}
+            />
+          )}
         </>
       )}
     </AnimatePresence>
