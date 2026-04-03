@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, ChevronLeft, Settings, Globe, Plus, Minus } from 'lucide-react';
+import { MapPin, ChevronLeft, Settings, Globe, Plus, Minus, LocateFixed, LocateOff, Loader } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { projectVendorToPercent, percentToLatLon } from '../utils/geoProjection';
 import { CurrentUser } from '../types';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 interface Props {
   location: any;
@@ -27,10 +28,40 @@ interface Props {
 
 export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const imgContainerRef = useRef<HTMLDivElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [highlightedVendor, setHighlightedVendor] = useState<any>(null);
   const autoOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { position: gpsPosition, status: gpsStatus, request: requestGps } = useGeolocation();
+  const [imgNaturalSize, setImgNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null);
+
+  // Observe the inner image container — stable full-screen size inside TransformComponent
+  useEffect(() => {
+    const el = imgContainerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setContainerSize({ w: width, h: height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Compute the rendered image rect (object-contain math) for correct pin placement
+  const pinOverlayRect = (() => {
+    if (!imgNaturalSize || !containerSize) return null;
+    const scale = Math.min(containerSize.w / imgNaturalSize.w, containerSize.h / imgNaturalSize.h);
+    const w = imgNaturalSize.w * scale;
+    const h = imgNaturalSize.h * scale;
+    return {
+      left: (containerSize.w - w) / 2,
+      top: (containerSize.h - h) / 2,
+      width: w,
+      height: h,
+    };
+  })();
 
   useEffect(() => {
     return () => {
@@ -130,18 +161,24 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                   wrapperStyle={{ width: '100%', height: '100%' }}
                   contentStyle={{ width: '100%', height: '100%' }}
                 >
-                  <div className="relative w-full h-full">
+                  <div ref={imgContainerRef} className="relative w-full h-full">
                     <img
                       src={mapUrl}
                       alt={`Map of ${location.name}`}
                       className={`w-full h-full object-contain ${imgLoaded ? '' : 'invisible'}`}
-                      onLoad={() => setImgLoaded(true)}
+                      onLoad={(e) => {
+                        setImgLoaded(true);
+                        setImgNaturalSize({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight });
+                      }}
                       onError={() => setImgError(true)}
                       draggable={false}
                     />
-                    {/* Pin overlay — rendered regardless of imgLoaded so pins are accessible */}
+                    {/* Pin overlay — sized to match the actual rendered image area so pins land correctly */}
                     <div
-                      className={`absolute inset-0 ${pinPlacementMode ? 'cursor-crosshair' : ''}`}
+                      className={`absolute ${pinPlacementMode ? 'cursor-crosshair' : ''}`}
+                      style={pinOverlayRect
+                        ? { left: pinOverlayRect.left, top: pinOverlayRect.top, width: pinOverlayRect.width, height: pinOverlayRect.height }
+                        : { inset: 0 }}
                       onClick={pinPlacementMode ? handlePinOverlayClick : undefined}
                     >
                       {pinnedVendors.map((vendor: any) => {
@@ -173,6 +210,27 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                             </button>
                           );
                         })}
+
+                      {/* GPS blue dot */}
+                      {gpsPosition && (() => {
+                        const { x, y } = projectVendorToPercent(
+                          location.lat_nw, location.lon_nw,
+                          location.lat_se, location.lon_se,
+                          gpsPosition.lat, gpsPosition.lon
+                        );
+                        if (x < 0 || x > 100 || y < 0 || y > 100) return null;
+                        return (
+                          <div
+                            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30"
+                            style={{ top: `${y}%`, left: `${x}%` }}
+                          >
+                            <div className="relative flex items-center justify-center">
+                              <div className="absolute w-10 h-10 rounded-full bg-blue-400 opacity-30 animate-ping" />
+                              <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-md" />
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {/* Candidate pin — shown when admin has tapped to place */}
                       {candidatePin && (() => {
@@ -262,8 +320,21 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                   )}
                 </div>
 
-                {/* Bottom-right FAB column — zoom buttons */}
+                {/* Bottom-right FAB column — GPS + zoom buttons */}
                 <div className="absolute right-4 bottom-16 z-30 flex flex-col gap-3">
+                  <button
+                    onClick={gpsStatus === 'idle' || gpsStatus === 'denied' || gpsStatus === 'unavailable' ? requestGps : undefined}
+                    aria-label="My location"
+                    className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors ${gpsStatus === 'granted' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    {gpsStatus === 'pending' ? (
+                      <Loader className="w-5 h-5 animate-spin" />
+                    ) : gpsStatus === 'denied' || gpsStatus === 'unavailable' ? (
+                      <LocateOff className="w-5 h-5" />
+                    ) : (
+                      <LocateFixed className="w-5 h-5" />
+                    )}
+                  </button>
                   <button
                     onClick={() => zoomIn()}
                     aria-label="Zoom in"
