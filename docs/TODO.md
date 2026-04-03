@@ -26,3 +26,17 @@
 
 3. As User:
 - I want to rate a vendor from 1 to 5 star, by having a "Rate Vendor" section inbetween the "About" and "Recent Comments" section.
+
+## User:
+- Able to comment, Rate star rating
+- Create new account/change account password by typing old password, new password & new password again
+
+## Admin:
+- Create admin page: dashboard, manage users, manage vendors and their store, manage comments, manage food streets.
+- Add additional way to manage from the admin page, not just limited by the current way. 
+
+### Comments
+1. Comments should be filtered by vendor/street. Like we navigate to a street -> vendor -> then seeing the comments. 
+
+## Vendors:
+- Only update their OWN vendor (assigned by admin), can change vendor's name, about, images.

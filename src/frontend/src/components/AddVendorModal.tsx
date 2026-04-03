@@ -6,7 +6,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (vendor: any) => void;
-  coordinates: { x: number; y: number } | null;
+  coordinates: { x: number; y: number; lat?: number; lon?: number } | null;
   mode: 'add' | 'request';
 }
 
@@ -29,6 +29,7 @@ export default function AddVendorModal({ isOpen, onClose, onAdd, coordinates, mo
       reviews: 0,
       x: coordinates?.x || 50,
       y: coordinates?.y || 50,
+      ...(coordinates?.lat != null ? { lat: coordinates.lat, lon: coordinates.lon } : {}),
       type: 'food',
       address: 'New Location',
       images: []

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { CurrentUser } from '../types';
+import RegisterForm from './RegisterForm';
 
 interface Props {
   onLogin: (user: CurrentUser) => void;
@@ -11,6 +12,7 @@ export default function LoginScreen({ onLogin }: Props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,46 +55,60 @@ export default function LoginScreen({ onLogin }: Props) {
             <span className="text-3xl">🍜</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Food Story</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to explore food streets</p>
+          <p className="text-gray-500 text-sm mt-1">
+            {showRegister ? 'Create a new account' : 'Sign in to explore food streets'}
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input
-              required
-              autoComplete="username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-              placeholder="e.g. admin"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              required
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-              placeholder="••••••"
-            />
-          </div>
+        {showRegister ? (
+          <RegisterForm onLogin={onLogin} onBack={() => setShowRegister(false)} />
+        ) : (
+          <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input
+                required
+                autoComplete="username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                placeholder="e.g. admin"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input
+                required
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                placeholder="••••••"
+              />
+            </div>
 
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold mt-2 shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
-          >
-            {loading ? 'Signing in…' : 'Sign In'}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold mt-2 shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
+            >
+              {loading ? 'Signing in…' : 'Sign In'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowRegister(true)}
+              className="w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
+            >
+              Don't have an account? Create one
+            </button>
+          </form>
+        )}
       </motion.div>
     </motion.div>
   );

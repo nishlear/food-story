@@ -31,7 +31,7 @@ export default function App() {
   const [deletingLocation, setDeletingLocation] = useState<any>(null);
   const [isAddingVendor, setIsAddingVendor] = useState(false);
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = useState(false);
-  const [newVendorCoords, setNewVendorCoords] = useState<{ x: number; y: number } | null>(null);
+  const [newVendorCoords, setNewVendorCoords] = useState<{ x: number; y: number; lat?: number; lon?: number } | null>(null);
 
   const [pinPlacementMode, setPinPlacementMode] = useState(false);
   const [pinPlacementVendor, setPinPlacementVendor] = useState<any>(null);
@@ -190,7 +190,9 @@ export default function App() {
         headers: authHeaders(),
         body: JSON.stringify(newVendor),
       });
-      setVendors([...vendors, newVendor]);
+      const res = await fetch(`/api/streets/${selectedLocation.id}/vendors`, { headers: authHeaders() });
+      const data = await res.json();
+      setVendors(data);
       setIsAddingVendor(false);
       const toastMsg = currentUser?.role === 'foodvendor'
         ? 'Vendor request submitted!'

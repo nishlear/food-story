@@ -87,4 +87,6 @@ pnpm-debug.log*
 
 # Project-specific
 AGENTS.md
-CLAUDE.md
+# CLAUDE.md
+static/
+.planning/

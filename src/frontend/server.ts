@@ -263,10 +263,10 @@ app.post('/api/streets/:id/vendors', (req, res) => {
   if (!authUser || (authUser.role !== 'admin' && authUser.role !== 'foodvendor')) {
     return res.status(403).json({ error: 'Forbidden' });
   }
-  const { id, name, description, rating, reviews, x, y, type, address, images } = req.body;
+  const { id, name, description, rating, reviews, x, y, type, address, images, lat, lon } = req.body;
   const owner_username = authUser.role === 'foodvendor' ? authUser.username : (req.body.owner_username || null);
-  db.prepare('INSERT INTO vendors (id, street_id, name, description, rating, reviews, x, y, type, address, images, owner_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(id, req.params.id, name, description, rating, reviews, x, y, type, address, JSON.stringify(images || []), owner_username);
+  db.prepare('INSERT INTO vendors (id, street_id, name, description, rating, reviews, x, y, type, address, images, owner_username, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .run(id, req.params.id, name, description, rating, reviews, x, y, type, address, JSON.stringify(images || []), owner_username, lat ?? null, lon ?? null);
   res.status(201).json({ success: true });
 });
 

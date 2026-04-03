@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Plus, Edit2, Trash2, LogOut } from 'lucide-react';
+import { Plus, Edit2, Trash2, LogOut, ShieldCheck } from 'lucide-react';
 import { CurrentUser } from '../types';
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   onDeleteClick: (loc: any) => void;
   currentUser: CurrentUser | null;
   onLogout: () => void;
+  onGoToAdmin: () => void;
 }
 
 const roleBadgeStyle: Record<string, string> = {
@@ -25,7 +26,7 @@ const roleLabel: Record<string, string> = {
   user: 'User',
 };
 
-export default function LocationSelection({ locations, onSelect, onAddClick, onEditClick, onDeleteClick, currentUser, onLogout }: Props) {
+export default function LocationSelection({ locations, onSelect, onAddClick, onEditClick, onDeleteClick, currentUser, onLogout, onGoToAdmin }: Props) {
   const isAdmin = currentUser?.role === 'admin';
 
   return (
@@ -47,12 +48,21 @@ export default function LocationSelection({ locations, onSelect, onAddClick, onE
             </span>
           )}
           {isAdmin && (
-            <button
-              onClick={onAddClick}
-              className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-            >
-              <Plus className="w-6 h-6" />
-            </button>
+            <>
+              <button
+                onClick={onGoToAdmin}
+                className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+                title="Admin Panel"
+              >
+                <ShieldCheck className="w-5 h-5" />
+              </button>
+              <button
+                onClick={onAddClick}
+                className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+              >
+                <Plus className="w-6 h-6" />
+              </button>
+            </>
           )}
           <button
             onClick={onLogout}

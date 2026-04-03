@@ -22,6 +22,8 @@ services:
       DATABASE_URL: postgresql://foodguide:foodguide@db/foodguide_db
     ports:
       - "8000:8000"
+    volumes:
+      - maps_data:/static/maps
     depends_on:
       db:
         condition: service_healthy
@@ -39,3 +41,4 @@ services:
 
 volumes:
   postgres_data:
+  maps_data:
