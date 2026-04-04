@@ -118,16 +118,20 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
   };
 
   const handlePinOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!location?.lat_nw) return;
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     const xPct = ((e.clientX - rect.left) / rect.width) * 100;
     const yPct = ((e.clientY - rect.top) / rect.height) * 100;
-    if (!location?.lat_nw) return;
     const { lat, lon } = percentToLatLon(
       location.lat_nw, location.lon_nw,
       location.lat_se, location.lon_se,
       xPct, yPct
     );
+    if (isAddingVendor) {
+      onMapClick({ x: xPct, y: yPct, lat, lon });
+      return;
+    }
     onPinPlacementTap?.(lat, lon);
   };
 
@@ -138,7 +142,7 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 50 }}
-      className={`w-full h-full relative bg-[#e5e3df] overflow-hidden ${isAddingVendor && !hasMap ? 'cursor-crosshair' : ''}`}
+      className={`w-full h-full relative bg-[#e5e3df] overflow-hidden ${isAddingVendor ? 'cursor-crosshair' : ''}`}
     >
       {hasMap ? (
         <>
@@ -178,11 +182,11 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                     />
                     {/* Pin overlay — sized to match the actual rendered image area so pins land correctly */}
                     <div
-                      className={`absolute ${pinPlacementMode ? 'cursor-crosshair' : ''}`}
+                      className={`absolute ${pinPlacementMode || isAddingVendor ? 'cursor-crosshair' : ''}`}
                       style={pinOverlayRect
                         ? { left: pinOverlayRect.left, top: pinOverlayRect.top, width: pinOverlayRect.width, height: pinOverlayRect.height }
                         : { inset: 0 }}
-                      onClick={pinPlacementMode ? handlePinOverlayClick : undefined}
+                      onClick={pinPlacementMode || isAddingVendor ? handlePinOverlayClick : undefined}
                     >
                       {pinnedVendors.map((vendor: any) => {
                           const { x, y } = projectVendorToPercent(
@@ -310,10 +314,9 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                   <LanguagePicker />
                   {canAddVendor && (
                     <button
-                      onClick={undefined}
-                      disabled={true}
+                      onClick={onAddVendorClick}
                       aria-label="Add vendor"
-                      className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors opacity-50 cursor-not-allowed bg-white text-gray-700"
+                      className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors ${isAddingVendor ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                     >
                       <Plus className="w-6 h-6" />
                     </button>

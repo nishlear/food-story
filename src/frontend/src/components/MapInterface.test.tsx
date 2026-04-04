@@ -85,6 +85,24 @@ describe('MapInterface — MVIEW-02: TransformWrapper rendered in map mode', () 
   });
 });
 
+describe('MapInterface — add vendor control', () => {
+  it('keeps Add Vendor enabled in real-map mode for admins', () => {
+    const onAddVendorClick = vi.fn();
+    render(
+      <MapInterface
+        {...BASE_PROPS}
+        location={LOCATION_WITH_MAP}
+        currentUser={{ username: 'admin', role: 'admin', token: 'token' }}
+        onAddVendorClick={onAddVendorClick}
+      />
+    );
+    const addVendorButton = screen.getByRole('button', { name: 'Add vendor' });
+    expect(addVendorButton).not.toBeDisabled();
+    fireEvent.click(addVendorButton);
+    expect(onAddVendorClick).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('MapInterface — INT-02: unpinned vendors omitted', () => {
   it('does not render a pin for vendors without lat/lon', () => {
     const unpinnedVendors = [
