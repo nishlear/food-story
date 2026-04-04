@@ -1,24 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Star, Navigation, Share2, X, Edit2 } from 'lucide-react';
-import { CurrentUser, Comment } from '../types';
+import { CurrentUser, Comment, Vendor } from '../types';
 import VendorRateForm from './VendorRateForm';
 import VendorCommentsList from './VendorCommentsList';
 import VendorEditModal from './VendorEditModal';
 import { useLanguage } from '../i18n/context';
+import { getDescriptionForLanguage } from '../utils/vendorDescriptions';
 
 interface Props {
-  vendor: any;
+  vendor: Vendor | null;
   onClose: () => void;
   onShare: () => void;
   currentUser: CurrentUser | null;
   authHeaders: () => Record<string, string>;
   hasMap?: boolean;
-  onSetPinLocation?: (vendor: any) => void;
+  onSetPinLocation?: (vendor: Vendor) => void;
+  onVendorUpdated?: (vendor: Vendor) => void;
 }
 
-export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation }: Props) {
-  const { t } = useLanguage();
+export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated }: Props) {
+  const { t, language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -47,6 +49,8 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
 
   const isOwner = currentUser?.role === 'foodvendor' && vendor?.owner_username === currentUser?.username;
   const canEdit = currentUser?.role === 'admin' || isOwner;
+  const imageList = Array.isArray(vendor?.images) ? vendor.images : [];
+  const description = vendor ? getDescriptionForLanguage(vendor.description_translations, language) : null;
 
   return (
     <AnimatePresence>
@@ -130,9 +134,9 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               onScroll={handleScroll}
             >
               {/* Vendor Images */}
-              {vendor.images && vendor.images.length > 0 && (
+              {imageList.length > 0 && (
                 <div className="flex gap-3 overflow-x-auto pb-2 pt-2 snap-x" style={{ scrollbarWidth: 'none' }}>
-                  {vendor.images.map((img: string, idx: number) => (
+                  {imageList.map((img: string, idx: number) => (
                     <img
                       key={idx}
                       src={img}
@@ -147,7 +151,7 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               <div className="py-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">{t.about}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  {vendor.description || t.defaultDescription}
+                  {description || t.defaultDescription}
                 </p>
               </div>
 
@@ -184,7 +188,8 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               vendor={vendor}
               streetId={vendor.street_id}
               authHeaders={authHeaders}
-              onUpdated={() => {
+              onUpdated={(updatedVendor) => {
+                onVendorUpdated?.(updatedVendor);
                 setIsEditOpen(false);
               }}
               hasMap={hasMap}

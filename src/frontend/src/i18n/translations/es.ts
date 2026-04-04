@@ -186,6 +186,7 @@ export const es: Translations = {
   failedDeleteStreet: 'Error al eliminar la calle',
   vendorRequestSubmitted: '¡Solicitud de puesto enviada!',
   vendorAdded: 'Puesto añadido con éxito',
+  vendorUpdated: 'Puesto actualizado con éxito',
   failedAddVendor: 'Error al añadir el puesto',
   linkCopied: '¡Enlace copiado al portapapeles!',
 

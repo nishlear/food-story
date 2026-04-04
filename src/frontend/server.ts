@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import Database from 'better-sqlite3';
 import { createServer as createViteServer } from 'vite';
@@ -10,6 +11,168 @@ const execFileAsync = promisify(execFile);
 
 const app = express();
 app.use(express.json());
+
+const SUPPORTED_LANGUAGES = ['en', 'vi', 'ko', 'ja', 'zh-CN', 'zh-TW', 'es'] as const;
+type Language = typeof SUPPORTED_LANGUAGES[number];
+type DescriptionTranslations = Partial<Record<Language, string>>;
+
+function isLanguage(value: unknown): value is Language {
+  return typeof value === 'string' && SUPPORTED_LANGUAGES.includes(value as Language);
+}
+
+function cleanText(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function normalizeDescriptionTranslations(value: unknown): DescriptionTranslations {
+  const textValue = cleanText(value);
+  if (!textValue) return {};
+
+  try {
+    const parsed = JSON.parse(textValue);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return { en: textValue };
+    }
+
+    const normalized: DescriptionTranslations = {};
+    for (const language of SUPPORTED_LANGUAGES) {
+      const translated = cleanText((parsed as Record<string, unknown>)[language]);
+      if (translated) normalized[language] = translated;
+    }
+    return normalized;
+  } catch {
+    return { en: textValue };
+  }
+}
+
+function pickDisplayDescription(descriptions: DescriptionTranslations): string | null {
+  const priority: Language[] = ['vi', 'en', 'ko', 'ja', 'zh-CN', 'zh-TW', 'es'];
+  for (const language of priority) {
+    const text = cleanText(descriptions[language]);
+    if (text) return text;
+  }
+  for (const text of Object.values(descriptions)) {
+    const normalized = cleanText(text);
+    if (normalized) return normalized;
+  }
+  return null;
+}
+
+function serializeDescriptionTranslations(descriptions: DescriptionTranslations): string | null {
+  const normalized: DescriptionTranslations = {};
+  for (const language of SUPPORTED_LANGUAGES) {
+    const text = cleanText(descriptions[language]);
+    if (text) normalized[language] = text;
+  }
+  return Object.keys(normalized).length > 0 ? JSON.stringify(normalized) : null;
+}
+
+function normalizeVendorRecord(vendor: any) {
+  const descriptionTranslations = normalizeDescriptionTranslations(vendor.description);
+  return {
+    ...vendor,
+    description: pickDisplayDescription(descriptionTranslations),
+    description_translations: descriptionTranslations,
+    images: JSON.parse(vendor.images || '[]')
+  };
+}
+
+async function translateVietnameseDescription(description: string): Promise<DescriptionTranslations> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY is not configured');
+
+  const targetLanguages = SUPPORTED_LANGUAGES.filter((language) => language !== 'vi');
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      temperature: 0,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: 'You translate Vietnamese vendor descriptions into other languages. Return JSON only. Preserve meaning, tone, and food-specific details. Keys must exactly match the requested language codes.',
+        },
+        {
+          role: 'user',
+          content: JSON.stringify({
+            source_language: 'vi',
+            source_text: description,
+            target_languages: targetLanguages,
+          }),
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI translation failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  const content = data?.choices?.[0]?.message?.content;
+  const parsed = typeof content === 'string' ? JSON.parse(content) : {};
+  const translations: DescriptionTranslations = {};
+  for (const language of targetLanguages) {
+    const translated = cleanText(parsed?.[language]);
+    if (translated) translations[language] = translated;
+  }
+  return translations;
+}
+
+async function buildDescriptionTranslations(
+  existingValue: unknown,
+  description: unknown,
+  descriptionLanguage: unknown,
+  providedTranslations?: unknown
+): Promise<DescriptionTranslations> {
+  if (providedTranslations && typeof providedTranslations === 'object' && !Array.isArray(providedTranslations)) {
+    const normalized: DescriptionTranslations = {};
+    for (const language of SUPPORTED_LANGUAGES) {
+      const translated = cleanText((providedTranslations as Record<string, unknown>)[language]);
+      if (translated) normalized[language] = translated;
+    }
+    return normalized;
+  }
+
+  const sourceLanguage: Language = isLanguage(descriptionLanguage) ? descriptionLanguage : 'en';
+  const next = normalizeDescriptionTranslations(existingValue);
+  const sourceText = cleanText(description);
+
+  if (!sourceText) {
+    delete next[sourceLanguage];
+    return next;
+  }
+
+  next[sourceLanguage] = sourceText;
+
+  if (sourceLanguage !== 'vi') {
+    return next;
+  }
+
+  try {
+    const translations = await translateVietnameseDescription(sourceText);
+    for (const language of SUPPORTED_LANGUAGES) {
+      if (language === 'vi') continue;
+      const translated = cleanText(translations[language]);
+      if (translated) {
+        next[language] = translated;
+      } else {
+        delete next[language];
+      }
+    }
+  } catch (error) {
+    console.error('Vendor description translation failed:', error);
+  }
+
+  return next;
+}
 
 // --- Database Setup ---
 const db = new Database('app.db');
@@ -250,28 +413,27 @@ app.delete('/api/streets/:id', (req, res) => {
 app.get('/api/streets/:id/vendors', (req, res) => {
   if (!getRoleFromRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
   const vendors = db.prepare('SELECT * FROM vendors WHERE street_id = ?').all(req.params.id);
-  const parsedVendors = vendors.map((v: any) => ({
-    ...v,
-    images: JSON.parse(v.images || '[]')
-  }));
+  const parsedVendors = vendors.map((v: any) => normalizeVendorRecord(v));
   res.json(parsedVendors);
 });
 
 // POST /api/streets/:id/vendors — admin or foodvendor
-app.post('/api/streets/:id/vendors', (req, res) => {
+app.post('/api/streets/:id/vendors', async (req, res) => {
   const authUser = getUserFromRequest(req);
   if (!authUser || (authUser.role !== 'admin' && authUser.role !== 'foodvendor')) {
     return res.status(403).json({ error: 'Forbidden' });
   }
-  const { id, name, description, rating, reviews, x, y, type, address, images, lat, lon } = req.body;
+  const { id, name, description, description_language, rating, reviews, x, y, type, address, images, lat, lon } = req.body;
   const owner_username = authUser.role === 'foodvendor' ? authUser.username : (req.body.owner_username || null);
+  const descriptionTranslations = await buildDescriptionTranslations(null, description, description_language);
   db.prepare('INSERT INTO vendors (id, street_id, name, description, rating, reviews, x, y, type, address, images, owner_username, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-    .run(id, req.params.id, name, description, rating, reviews, x, y, type, address, JSON.stringify(images || []), owner_username, lat ?? null, lon ?? null);
-  res.status(201).json({ success: true });
+    .run(id, req.params.id, name, serializeDescriptionTranslations(descriptionTranslations), rating, reviews, x, y, type, address, JSON.stringify(images || []), owner_username, lat ?? null, lon ?? null);
+  const createdVendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(id) as any;
+  res.status(201).json(normalizeVendorRecord(createdVendor));
 });
 
 // PUT /api/streets/:streetId/vendors/:vendorId — admin or owning foodvendor
-app.put('/api/streets/:streetId/vendors/:vendorId', (req, res) => {
+app.put('/api/streets/:streetId/vendors/:vendorId', async (req, res) => {
   const authUser = getUserFromRequest(req);
   if (!authUser) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -279,17 +441,21 @@ app.put('/api/streets/:streetId/vendors/:vendorId', (req, res) => {
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 
   if (authUser.role === 'admin') {
-    const { name, description, images, owner_username, rating, reviews, x, y, type, address, lat, lon } = req.body;
+    const { name, description, description_language, description_translations, images, owner_username, rating, reviews, x, y, type, address, lat, lon } = req.body;
+    const nextDescription = await buildDescriptionTranslations(vendor.description, description, description_language, description_translations);
     db.prepare('UPDATE vendors SET name = ?, description = ?, images = ?, owner_username = ?, rating = ?, reviews = ?, x = ?, y = ?, type = ?, address = ?, lat = ?, lon = ? WHERE id = ?')
-      .run(name, description, JSON.stringify(images || []), owner_username || null, rating, reviews, x, y, type, address, lat ?? null, lon ?? null, req.params.vendorId);
-    return res.json({ success: true });
+      .run(name, serializeDescriptionTranslations(nextDescription), JSON.stringify(images || []), owner_username || null, rating, reviews, x, y, type, address, lat ?? null, lon ?? null, req.params.vendorId);
+    const updatedVendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+    return res.json(normalizeVendorRecord(updatedVendor));
   }
 
   if (authUser.role === 'foodvendor' && vendor.owner_username === authUser.username) {
-    const { name, description, images } = req.body;
+    const { name, description, description_language, images } = req.body;
+    const nextDescription = await buildDescriptionTranslations(vendor.description, description, description_language);
     db.prepare('UPDATE vendors SET name = ?, description = ?, images = ? WHERE id = ?')
-      .run(name, description, JSON.stringify(images || []), req.params.vendorId);
-    return res.json({ success: true });
+      .run(name, serializeDescriptionTranslations(nextDescription), JSON.stringify(images || []), req.params.vendorId);
+    const updatedVendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+    return res.json(normalizeVendorRecord(updatedVendor));
   }
 
   return res.status(403).json({ error: 'Forbidden' });
@@ -301,10 +467,7 @@ app.get('/api/vendors/mine', (req, res) => {
   if (!authUser) return res.status(401).json({ error: 'Unauthorized' });
   if (authUser.role !== 'foodvendor') return res.status(403).json({ error: 'Forbidden' });
   const vendors = db.prepare('SELECT * FROM vendors WHERE owner_username = ?').all(authUser.username);
-  const parsedVendors = vendors.map((v: any) => ({
-    ...v,
-    images: JSON.parse(v.images || '[]')
-  }));
+  const parsedVendors = vendors.map((v: any) => normalizeVendorRecord(v));
   res.json(parsedVendors);
 });
 
@@ -397,7 +560,10 @@ app.get('/api/admin/vendors', (req, res) => {
     FROM vendors v
     LEFT JOIN streets s ON v.street_id = s.id
   `).all();
-  const parsed = vendors.map((v: any) => ({ ...v, images: JSON.parse(v.images || '[]') }));
+  const parsed = vendors.map((v: any) => ({
+    ...normalizeVendorRecord(v),
+    street_name: v.street_name,
+  }));
   res.json(parsed);
 });
 

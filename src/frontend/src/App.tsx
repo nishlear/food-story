@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { CurrentUser } from './types';
+import { CurrentUser, Vendor } from './types';
 import { useLanguage } from './i18n/context';
 import LoginScreen from './components/LoginScreen';
 import LocationSelection from './components/LocationSelection';
@@ -22,10 +22,10 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
 
   const [locations, setLocations] = useState<any[]>([]);
-  const [vendors, setVendors] = useState<any[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [selectedVendor, setSelectedVendor] = useState<any>(null);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [isAddLocationOpen, setIsAddLocationOpen] = useState(false);
@@ -36,7 +36,7 @@ export default function App() {
   const [newVendorCoords, setNewVendorCoords] = useState<{ x: number; y: number; lat?: number; lon?: number } | null>(null);
 
   const [pinPlacementMode, setPinPlacementMode] = useState(false);
-  const [pinPlacementVendor, setPinPlacementVendor] = useState<any>(null);
+  const [pinPlacementVendor, setPinPlacementVendor] = useState<Vendor | null>(null);
   const [candidatePin, setCandidatePin] = useState<{ lat: number; lon: number } | null>(null);
 
   const [audioEnabled, setAudioEnabled] = useState(true);
@@ -131,7 +131,7 @@ export default function App() {
     }
   };
 
-  const handleMapClick = (coords: { x: number; y: number }) => {
+  const handleMapClick = (coords: { x: number; y: number; lat?: number; lon?: number }) => {
     setNewVendorCoords(coords);
     setIsAddVendorModalOpen(true);
   };
@@ -142,7 +142,7 @@ export default function App() {
     setCandidatePin(null);
   };
 
-  const handleSetPinLocation = (vendor: any) => {
+  const handleSetPinLocation = (vendor: Vendor) => {
     setSelectedVendor(null);           // close bottom sheet
     setPinPlacementVendor(vendor);
     setPinPlacementMode(true);
@@ -205,6 +205,14 @@ export default function App() {
     }
   };
 
+  const handleVendorUpdated = (updatedVendor: Vendor) => {
+    setVendors((prev) => prev.map((vendor) => (
+      vendor.id === updatedVendor.id ? updatedVendor : vendor
+    )));
+    setSelectedVendor(updatedVendor);
+    showToast(t.vendorUpdated);
+  };
+
   const vendorModalMode = currentUser?.role === 'foodvendor' ? 'request' : 'add';
 
   return (
@@ -214,11 +222,10 @@ export default function App() {
     >
       <AnimatePresence mode="wait">
         {currentScreen === 'login' && (
-          <LoginScreen key="login" onLogin={handleLogin} />
+          <LoginScreen onLogin={handleLogin} />
         )}
         {currentScreen === 'location' && (
           <LocationSelection
-            key="location"
             locations={locations}
             onSelect={handleSelectLocation}
             onAddClick={() => setIsAddLocationOpen(true)}
@@ -231,7 +238,6 @@ export default function App() {
         )}
         {currentScreen === 'map' && (
           <MapInterface
-            key="map"
             location={selectedLocation}
             vendors={vendors}
             onBack={() => {
@@ -257,7 +263,6 @@ export default function App() {
         )}
         {currentScreen === 'admin' && (
           <AdminScreen
-            key="admin"
             currentUser={currentUser}
             onBack={() => setCurrentScreen('location')}
             authHeaders={authHeaders}
@@ -319,6 +324,7 @@ export default function App() {
                    selectedLocation?.lat_se != null &&
                    selectedLocation?.lon_se != null)}
         onSetPinLocation={handleSetPinLocation}
+        onVendorUpdated={handleVendorUpdated}
       />
 
       {/* Toast */}

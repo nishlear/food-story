@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function AddVendorModal({ isOpen, onClose, onAdd, coordinates, mode }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [rating, setRating] = useState('5.0');
@@ -27,6 +27,7 @@ export default function AddVendorModal({ isOpen, onClose, onAdd, coordinates, mo
       id: Date.now().toString(),
       name,
       description,
+      description_language: language,
       rating: parseFloat(rating),
       reviews: 0,
       x: coordinates?.x || 50,

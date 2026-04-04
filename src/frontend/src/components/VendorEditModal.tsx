@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Store, MapPin } from 'lucide-react';
-import { CurrentUser } from '../types';
+import { CurrentUser, Vendor } from '../types';
 import { useLanguage } from '../i18n/context';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  vendor: any;
+  vendor: Vendor | null;
   streetId: string;
   authHeaders: () => Record<string, string>;
-  onUpdated: () => void;
+  onUpdated: (vendor: Vendor) => void;
   hasMap?: boolean;
   currentUser?: CurrentUser | null;
   onSetPinLocation?: () => void;
 }
 
 export default function VendorEditModal({ isOpen, onClose, vendor, streetId, authHeaders, onUpdated, hasMap, currentUser, onSetPinLocation }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState('');
@@ -27,10 +27,10 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
   useEffect(() => {
     if (vendor) {
       setName(vendor.name || '');
-      setDescription(vendor.description || '');
+      setDescription(vendor.description_translations?.[language] || '');
       setImages((vendor.images || []).join('\n'));
     }
-  }, [vendor]);
+  }, [vendor, language]);
 
   const handleClose = () => {
     setError('');
@@ -39,6 +39,7 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!vendor) return;
     setError('');
     setLoading(true);
     try {
@@ -46,14 +47,28 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
       const res = await fetch(`/api/streets/${streetId}/vendors/${vendor.id}`, {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ name, description, images: imageList }),
+        body: JSON.stringify({
+          name,
+          description,
+          description_language: language,
+          images: imageList,
+          owner_username: vendor.owner_username,
+          rating: vendor.rating,
+          reviews: vendor.reviews,
+          x: vendor.x,
+          y: vendor.y,
+          type: vendor.type,
+          address: vendor.address,
+          lat: vendor.lat,
+          lon: vendor.lon,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || data.detail || 'Failed to update vendor');
         return;
       }
-      onUpdated();
+      onUpdated(data);
       handleClose();
     } catch {
       setError('Connection error. Please try again.');

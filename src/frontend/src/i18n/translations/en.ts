@@ -186,6 +186,7 @@ export const en: Translations = {
   failedDeleteStreet: 'Failed to delete street',
   vendorRequestSubmitted: 'Vendor request submitted!',
   vendorAdded: 'Vendor added successfully',
+  vendorUpdated: 'Vendor updated successfully',
   failedAddVendor: 'Failed to add vendor',
   linkCopied: 'Link copied to clipboard!',
 

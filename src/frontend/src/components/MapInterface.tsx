@@ -17,7 +17,7 @@ interface Props {
   selectedVendor: any;
   isAddingVendor: boolean;
   onAddVendorClick: () => void;
-  onMapClick: (coords: { x: number; y: number }) => void;
+  onMapClick: (coords: { x: number; y: number; lat?: number; lon?: number }) => void;
   currentUser: CurrentUser | null;
   // Pin placement props
   pinPlacementMode?: boolean;

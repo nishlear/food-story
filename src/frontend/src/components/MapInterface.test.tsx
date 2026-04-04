@@ -1,6 +1,8 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import MapInterface from './MapInterface';
+import { LanguageProvider } from '../i18n/context';
 
 // Mock react-zoom-pan-pinch — not installed until Plan 02 executes.
 // Replace with a passthrough so tests focus on MapInterface logic.
@@ -51,9 +53,13 @@ const LOCATION_WITH_MAP = {
   map_updated_at: '2026-03-19T00:00:00Z',
 };
 
+function renderWithLanguage(ui: React.ReactElement) {
+  return render(<LanguageProvider>{ui}</LanguageProvider>);
+}
+
 describe('MapInterface — MVIEW-03: no-map fallback', () => {
   it('renders vendor list fallback when map_image_path is null', () => {
-    render(<MapInterface {...BASE_PROPS} />);
+    renderWithLanguage(<MapInterface {...BASE_PROPS} />);
     // The existing mock-map path renders when hasMap is false.
     // No <img> with a maps/ src should be present.
     const imgs = document.querySelectorAll('img[src*="maps/"]');
@@ -63,13 +69,13 @@ describe('MapInterface — MVIEW-03: no-map fallback', () => {
 
 describe('MapInterface — MVIEW-01: map renders when map_image_path is set', () => {
   it('renders an img element when map_image_path is provided', () => {
-    render(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} />);
+    renderWithLanguage(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} />);
     const img = document.querySelector('img[src*="maps/1.png"]') as HTMLImageElement | null;
     expect(img).not.toBeNull();
   });
 
   it('appends cache-busting query param to img src', () => {
-    render(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} />);
+    renderWithLanguage(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} />);
     const img = document.querySelector('img[src*="maps/1.png"]') as HTMLImageElement | null;
     expect(img?.src).toContain('?t=');
   });
@@ -78,7 +84,7 @@ describe('MapInterface — MVIEW-01: map renders when map_image_path is set', ()
 describe('MapInterface — MVIEW-02: TransformWrapper rendered in map mode', () => {
   it('renders TransformWrapper when map_image_path is set', () => {
     // The mock lets TransformWrapper render its children; if it appears in the tree the mock was called.
-    const { container } = render(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} />);
+    const { container } = renderWithLanguage(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} />);
     // TransformWrapper mock renders children — existence of img inside it confirms it was mounted.
     const img = container.querySelector('img[src*="maps/1.png"]');
     expect(img).not.toBeNull();
@@ -88,7 +94,7 @@ describe('MapInterface — MVIEW-02: TransformWrapper rendered in map mode', () 
 describe('MapInterface — add vendor control', () => {
   it('keeps Add Vendor enabled in real-map mode for admins', () => {
     const onAddVendorClick = vi.fn();
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -108,7 +114,7 @@ describe('MapInterface — INT-02: unpinned vendors omitted', () => {
     const unpinnedVendors = [
       { id: 1, name: 'No Pin Vendor', lat: null, lon: null, x: 50, y: 50 },
     ];
-    render(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} vendors={unpinnedVendors} />);
+    renderWithLanguage(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} vendors={unpinnedVendors} />);
     // If the vendor has no lat/lon it must not appear as a pin button on the map.
     const pinButton = screen.queryByRole('button', { name: 'No Pin Vendor' });
     expect(pinButton).toBeNull();
@@ -118,7 +124,7 @@ describe('MapInterface — INT-02: unpinned vendors omitted', () => {
     const pinnedVendors = [
       { id: 2, name: 'Pinned Vendor', lat: 3.1468, lon: 101.7098, x: 50, y: 50 },
     ];
-    render(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} vendors={pinnedVendors} />);
+    renderWithLanguage(<MapInterface {...BASE_PROPS} location={LOCATION_WITH_MAP} vendors={pinnedVendors} />);
     const pinButton = screen.getByRole('button', { name: 'Pinned Vendor' });
     expect(pinButton).toBeInTheDocument();
   });
@@ -133,7 +139,7 @@ describe('MapInterface — INT-01: pin tap auto-opens bottom sheet after 300ms',
     const pinnedVendors = [
       { id: 3, name: 'Tappable Vendor', lat: 3.1468, lon: 101.7098, x: 50, y: 50 },
     ];
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -153,7 +159,7 @@ describe('MapInterface — INT-01: pin tap auto-opens bottom sheet after 300ms',
     const pinnedVendors = [
       { id: 4, name: 'Double Tap Vendor', lat: 3.1468, lon: 101.7098, x: 50, y: 50 },
     ];
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -170,7 +176,7 @@ describe('MapInterface — INT-01: pin tap auto-opens bottom sheet after 300ms',
 
 describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
   it('shows instruction banner when pinPlacementMode=true and candidatePin=null', () => {
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -183,7 +189,7 @@ describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
   });
 
   it('includes vendor name in instruction banner', () => {
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -196,7 +202,7 @@ describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
   });
 
   it('shows confirmation overlay when candidatePin is set', () => {
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -210,7 +216,7 @@ describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
 
   it('calls onConfirmPin when Confirm button is clicked', () => {
     const onConfirmPin = vi.fn();
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -225,7 +231,7 @@ describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
 
   it('calls onCancelPin when Cancel button is clicked', () => {
     const onCancelPin = vi.fn();
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={LOCATION_WITH_MAP}
@@ -239,7 +245,7 @@ describe('MapInterface — MSET-03/MSET-04: pin placement mode', () => {
   });
 
   it('does not show instruction banner or confirmation overlay when hasMap=false', () => {
-    render(
+    renderWithLanguage(
       <MapInterface
         {...BASE_PROPS}
         location={BASE_PROPS.location}

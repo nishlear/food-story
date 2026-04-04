@@ -186,6 +186,7 @@ export const zhTW: Translations = {
   failedDeleteStreet: '街道刪除失敗',
   vendorRequestSubmitted: '商家申請已提交！',
   vendorAdded: '商家新增成功',
+  vendorUpdated: '商家更新成功',
   failedAddVendor: '商家新增失敗',
   linkCopied: '連結已複製到剪貼簿！',
 

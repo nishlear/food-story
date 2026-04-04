@@ -186,6 +186,7 @@ export const ja: Translations = {
   failedDeleteStreet: 'ストリートの削除に失敗しました',
   vendorRequestSubmitted: '店舗リクエストを送信しました！',
   vendorAdded: '店舗を追加しました',
+  vendorUpdated: '店舗を更新しました',
   failedAddVendor: '店舗の追加に失敗しました',
   linkCopied: 'リンクをコピーしました！',
 

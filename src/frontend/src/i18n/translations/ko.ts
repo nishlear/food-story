@@ -186,6 +186,7 @@ export const ko: Translations = {
   failedDeleteStreet: '거리 삭제에 실패했습니다',
   vendorRequestSubmitted: '가게 요청이 제출되었습니다!',
   vendorAdded: '가게가 성공적으로 추가되었습니다',
+  vendorUpdated: '가게가 성공적으로 업데이트되었습니다',
   failedAddVendor: '가게 추가에 실패했습니다',
   linkCopied: '링크가 클립보드에 복사되었습니다!',
 

@@ -186,6 +186,7 @@ export interface Translations {
   failedDeleteStreet: string;
   vendorRequestSubmitted: string;
   vendorAdded: string;
+  vendorUpdated: string;
   failedAddVendor: string;
   linkCopied: string;
 

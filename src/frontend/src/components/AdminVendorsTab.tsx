@@ -44,6 +44,7 @@ export default function AdminVendorsTab({ authHeaders }: Props) {
       body: JSON.stringify({
         name: vendor.name,
         description: vendor.description,
+        description_translations: vendor.description_translations,
         images: vendor.images,
         owner_username,
         rating: vendor.rating,

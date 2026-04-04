@@ -186,6 +186,7 @@ export const vi: Translations = {
   failedDeleteStreet: 'Không thể xóa phố',
   vendorRequestSubmitted: 'Đã gửi yêu cầu thêm quán!',
   vendorAdded: 'Đã thêm quán thành công',
+  vendorUpdated: 'Đã cập nhật quán thành công',
   failedAddVendor: 'Không thể thêm quán',
   linkCopied: 'Đã sao chép liên kết!',
 
