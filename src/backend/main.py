@@ -124,7 +124,7 @@ class FoodVendorBase(BaseModel):
     name: str
     description: Optional[str] = None
     description_language: str = "en"
-    description_translations: Dict[str, str] = {}
+    description_translations: Optional[Dict[str, str]] = None
     rating: float = 0.0
     reviews: int = 0
     x: float
@@ -816,12 +816,12 @@ def update_vendor(
 
     if current_user["role"] == "admin":
         data = vendor.model_dump()
-        data.pop("description_language", None)
+        description_language = data.pop("description_language", None)
         provided_translations = data.pop("description_translations", None)
         description_translations = build_description_translations(
             db_vendor.description,
             data.get("description"),
-            data.get("description_language"),
+            description_language,
             provided_translations,
         )
         data["description"] = serialize_description_translations(description_translations)
