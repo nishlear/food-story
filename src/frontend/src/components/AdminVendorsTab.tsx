@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Trash2, RefreshCw, Star } from 'lucide-react';
+import { useLanguage, interpolate } from '../i18n/context';
 
 interface Props {
   authHeaders: () => Record<string, string>;
 }
 
 export default function AdminVendorsTab({ authHeaders }: Props) {
+  const { t } = useLanguage();
   const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [ownerInputs, setOwnerInputs] = useState<Record<string, string>>({});
@@ -26,7 +28,7 @@ export default function AdminVendorsTab({ authHeaders }: Props) {
   useEffect(() => { fetchVendors(); }, []);
 
   const handleDelete = async (vendor: any) => {
-    if (!confirm(`Delete vendor "${vendor.name}"?`)) return;
+    if (!confirm(interpolate(t.deleteVendorConfirm, { name: vendor.name }))) return;
     await fetch(`/api/streets/${vendor.street_id}/vendors/${vendor.id}`, {
       method: 'DELETE',
       headers: authHeaders(),
@@ -66,7 +68,7 @@ export default function AdminVendorsTab({ authHeaders }: Props) {
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">All Vendors</h2>
+        <h2 className="text-xl font-bold text-gray-900">{t.allVendors}</h2>
         <button onClick={fetchVendors} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -95,14 +97,14 @@ export default function AdminVendorsTab({ authHeaders }: Props) {
                 type="text"
                 value={ownerInputs[vendor.id] ?? ''}
                 onChange={e => setOwnerInputs(prev => ({ ...prev, [vendor.id]: e.target.value }))}
-                placeholder="Assign owner username"
+                placeholder={t.assignOwnerPlaceholder}
                 className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
               />
               <button
                 onClick={() => handleAssignOwner(vendor)}
                 className="bg-orange-500 text-white px-3 py-2 rounded-xl text-sm font-semibold hover:bg-orange-600 transition-colors"
               >
-                Save
+                {t.save}
               </button>
             </div>
           </div>

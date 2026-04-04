@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { CurrentUser } from '../types';
 import RegisterForm from './RegisterForm';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   onLogin: (user: CurrentUser) => void;
 }
 
 export default function LoginScreen({ onLogin }: Props) {
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,13 +27,13 @@ export default function LoginScreen({ onLogin }: Props) {
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
-        setError('Invalid username or password');
+        setError(t.invalidCredentials);
         return;
       }
       const data = await res.json();
       onLogin({ username: data.username, role: data.role, token: data.token });
     } catch {
-      setError('Connection error. Please try again.');
+      setError(t.connectionError);
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ export default function LoginScreen({ onLogin }: Props) {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Food Story</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {showRegister ? 'Create a new account' : 'Sign in to explore food streets'}
+            {showRegister ? t.createAccountSubtitle : t.signInSubtitle}
           </p>
         </div>
 
@@ -65,18 +67,18 @@ export default function LoginScreen({ onLogin }: Props) {
         ) : (
           <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.username}</label>
               <input
                 required
                 autoComplete="username"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                placeholder="e.g. admin"
+                placeholder={t.usernamePlaceholder}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.password}</label>
               <input
                 required
                 type="password"
@@ -97,7 +99,7 @@ export default function LoginScreen({ onLogin }: Props) {
               disabled={loading}
               className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold mt-2 shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
             >
-              {loading ? 'Signing in…' : 'Sign In'}
+              {loading ? t.signingIn : t.signIn}
             </button>
 
             <button
@@ -105,7 +107,7 @@ export default function LoginScreen({ onLogin }: Props) {
               onClick={() => setShowRegister(true)}
               className="w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
             >
-              Don't have an account? Create one
+              {t.noAccount}
             </button>
           </form>
         )}

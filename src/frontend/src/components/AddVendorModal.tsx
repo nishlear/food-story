@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   isOpen: boolean;
@@ -11,12 +12,13 @@ interface Props {
 }
 
 export default function AddVendorModal({ isOpen, onClose, onAdd, coordinates, mode }: Props) {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [rating, setRating] = useState('5.0');
 
-  const title = mode === 'add' ? 'Add Vendor' : 'Request Vendor';
-  const submitLabel = mode === 'add' ? 'Add Vendor' : 'Submit Request';
+  const title = mode === 'add' ? t.addVendor : t.requestVendor;
+  const submitLabel = mode === 'add' ? t.addVendor : t.submitRequest;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +51,9 @@ export default function AddVendorModal({ isOpen, onClose, onAdd, coordinates, mo
               <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Vendor Name</label><input required value={name} onChange={e => setName(e.target.value)} className="w-full border border-gray-300 rounded-xl p-3" placeholder="e.g. Pad Thai Master" /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Description</label><textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full border border-gray-300 rounded-xl p-3" placeholder="Brief description..." /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Initial Rating</label><input type="number" step="0.1" min="1" max="5" required value={rating} onChange={e => setRating(e.target.value)} className="w-full border border-gray-300 rounded-xl p-3" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.vendorName}</label><input required value={name} onChange={e => setName(e.target.value)} className="w-full border border-gray-300 rounded-xl p-3" placeholder={t.vendorNamePlaceholder} /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.description}</label><textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full border border-gray-300 rounded-xl p-3" placeholder={t.briefDescriptionPlaceholder} /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t.initialRating}</label><input type="number" step="0.1" min="1" max="5" required value={rating} onChange={e => setRating(e.target.value)} className="w-full border border-gray-300 rounded-xl p-3" /></div>
               <button type="submit" className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold mt-4">{submitLabel}</button>
             </form>
           </motion.div>

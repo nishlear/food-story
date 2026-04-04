@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CurrentUser } from '../types';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   onLogin: (user: CurrentUser) => void;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function RegisterForm({ onLogin, onBack }: Props) {
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -17,7 +19,7 @@ export default function RegisterForm({ onLogin, onBack }: Props) {
     e.preventDefault();
     setError('');
     if (password !== confirm) {
-      setError('Passwords do not match');
+      setError(t.passwordMismatch);
       return;
     }
     setLoading(true);
@@ -34,7 +36,7 @@ export default function RegisterForm({ onLogin, onBack }: Props) {
       }
       onLogin({ username: data.username, role: data.role, token: data.token });
     } catch {
-      setError('Connection error. Please try again.');
+      setError(t.connectionError);
     } finally {
       setLoading(false);
     }
@@ -43,18 +45,18 @@ export default function RegisterForm({ onLogin, onBack }: Props) {
   return (
     <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t.username}</label>
         <input
           required
           autoComplete="username"
           value={username}
           onChange={e => setUsername(e.target.value)}
           className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-          placeholder="Choose a username"
+          placeholder={t.chooseUsernamePlaceholder}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t.password}</label>
         <input
           required
           type="password"
@@ -66,7 +68,7 @@ export default function RegisterForm({ onLogin, onBack }: Props) {
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t.confirmPassword}</label>
         <input
           required
           type="password"
@@ -87,7 +89,7 @@ export default function RegisterForm({ onLogin, onBack }: Props) {
         disabled={loading}
         className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold mt-2 shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
       >
-        {loading ? 'Creating account…' : 'Create Account'}
+        {loading ? t.creatingAccount : t.createAccount}
       </button>
 
       <button
@@ -95,7 +97,7 @@ export default function RegisterForm({ onLogin, onBack }: Props) {
         onClick={onBack}
         className="w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
       >
-        Already have an account? Sign in
+        {t.alreadyHaveAccount}
       </button>
     </form>
   );

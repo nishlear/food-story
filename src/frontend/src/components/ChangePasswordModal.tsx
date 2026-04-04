@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock } from 'lucide-react';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Props) {
+  const { t } = useLanguage();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,7 +31,7 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
     e.preventDefault();
     setError('');
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
+      setError(t.newPasswordsMismatch);
       return;
     }
     setLoading(true);
@@ -51,7 +53,7 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
       setSuccess(true);
       setTimeout(handleClose, 1500);
     } catch {
-      setError('Connection error. Please try again.');
+      setError(t.connectionError);
     } finally {
       setLoading(false);
     }
@@ -79,7 +81,7 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
                 <div className="p-2 rounded-xl bg-orange-100 text-orange-600">
                   <Lock className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Change Password</h3>
+                <h3 className="text-xl font-bold text-gray-900">{t.changePassword}</h3>
               </div>
               <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full">
                 <X className="w-5 h-5" />
@@ -89,12 +91,12 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               {success ? (
                 <div className="text-center py-4">
-                  <p className="text-green-600 font-semibold">Password changed successfully!</p>
+                  <p className="text-green-600 font-semibold">{t.passwordChangedSuccess}</p>
                 </div>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.currentPassword}</label>
                     <input
                       required
                       type="password"
@@ -105,7 +107,7 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.newPassword}</label>
                     <input
                       required
                       type="password"
@@ -116,7 +118,7 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.confirmNewPassword}</label>
                     <input
                       required
                       type="password"
@@ -136,7 +138,7 @@ export default function ChangePasswordModal({ isOpen, onClose, authHeaders }: Pr
                     disabled={loading}
                     className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
                   >
-                    {loading ? 'Saving…' : 'Save Password'}
+                    {loading ? t.saving : t.savePassword}
                   </button>
                 </>
               )}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Trash2, RefreshCw } from 'lucide-react';
 import { User, CurrentUser, UserRole } from '../types';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   authHeaders: () => Record<string, string>;
@@ -14,6 +15,7 @@ const roleBadgeStyle: Record<string, string> = {
 };
 
 export default function AdminUsersTab({ authHeaders, currentUser }: Props) {
+  const { t } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +39,7 @@ export default function AdminUsersTab({ authHeaders, currentUser }: Props) {
   };
 
   const handleDelete = async (userId: string) => {
-    if (!confirm('Delete this user?')) return;
+    if (!confirm(t.deleteUserConfirm)) return;
     await fetch(`/api/admin/users/${userId}`, {
       method: 'DELETE',
       headers: authHeaders(),
@@ -56,7 +58,7 @@ export default function AdminUsersTab({ authHeaders, currentUser }: Props) {
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">Users</h2>
+        <h2 className="text-xl font-bold text-gray-900">{t.usersHeading}</h2>
         <button onClick={fetchUsers} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -77,9 +79,9 @@ export default function AdminUsersTab({ authHeaders, currentUser }: Props) {
                 onChange={e => handleRoleChange(user.id, e.target.value)}
                 className={`text-xs font-semibold px-2 py-1 rounded-lg border-0 outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${roleBadgeStyle[user.role]}`}
               >
-                <option value="user">User</option>
-                <option value="foodvendor">Vendor</option>
-                <option value="admin">Admin</option>
+                <option value="user">{t.roleUser}</option>
+                <option value="foodvendor">{t.roleVendor}</option>
+                <option value="admin">{t.roleAdmin}</option>
               </select>
               <button
                 onClick={() => handleDelete(user.id)}

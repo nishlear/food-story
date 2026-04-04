@@ -6,6 +6,7 @@ import AdminDashboard from './AdminDashboard';
 import AdminUsersTab from './AdminUsersTab';
 import AdminVendorsTab from './AdminVendorsTab';
 import AdminCommentsTab from './AdminCommentsTab';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   currentUser: CurrentUser | null;
@@ -15,15 +16,16 @@ interface Props {
 
 type Tab = 'dashboard' | 'users' | 'vendors' | 'comments';
 
-const navItems: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'users', label: 'Users', icon: Users },
-  { id: 'vendors', label: 'Vendors', icon: Store },
-  { id: 'comments', label: 'Comments', icon: MessageSquare },
-];
-
 export default function AdminScreen({ currentUser, onBack, authHeaders }: Props) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+
+  const navItems: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
+    { id: 'dashboard', label: t.dashboard, icon: LayoutDashboard },
+    { id: 'users', label: t.users, icon: Users },
+    { id: 'vendors', label: t.vendors, icon: Store },
+    { id: 'comments', label: t.comments, icon: MessageSquare },
+  ];
 
   const initial = currentUser?.username?.[0]?.toUpperCase() ?? 'A';
 
@@ -39,7 +41,7 @@ export default function AdminScreen({ currentUser, onBack, authHeaders }: Props)
         {/* Brand */}
         <div className="px-4 mb-10">
           <h1 className="text-xl font-extrabold text-gray-900">Food Story</h1>
-          <p className="text-xs text-gray-400 uppercase tracking-widest mt-0.5">Admin Panel</p>
+          <p className="text-xs text-gray-400 uppercase tracking-widest mt-0.5">{t.adminPanel}</p>
         </div>
 
         {/* Nav */}
@@ -69,7 +71,7 @@ export default function AdminScreen({ currentUser, onBack, authHeaders }: Props)
               className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-3 rounded-full transition-colors shadow-sm shadow-orange-200"
             >
               <Plus className="w-4 h-4" />
-              Add New Vendor
+              {t.addNewVendor}
             </button>
           </div>
         </nav>
@@ -81,10 +83,10 @@ export default function AdminScreen({ currentUser, onBack, authHeaders }: Props)
             className="flex items-center gap-3 px-4 py-3 rounded-full text-sm text-gray-500 hover:bg-gray-100 transition-colors w-full text-left"
           >
             <ArrowLeft className="w-[18px] h-[18px]" />
-            Back to Map
+            {t.backToMap}
           </button>
           <div className="px-4 py-2 text-xs text-gray-400 truncate">
-            Signed in as <span className="font-semibold text-gray-600">{currentUser?.username}</span>
+            {t.signedInAs} <span className="font-semibold text-gray-600">{currentUser?.username}</span>
           </div>
         </div>
       </div>
@@ -96,7 +98,7 @@ export default function AdminScreen({ currentUser, onBack, authHeaders }: Props)
           <div className="relative">
             <input
               type="text"
-              placeholder="Search streets or vendors..."
+              placeholder={t.searchPlaceholder}
               className="bg-gray-100 rounded-full pl-10 pr-5 py-2 text-sm text-gray-500 placeholder-gray-400 outline-none w-72"
               readOnly
             />

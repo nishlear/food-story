@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { CurrentUser } from './types';
+import { useLanguage } from './i18n/context';
 import LoginScreen from './components/LoginScreen';
 import LocationSelection from './components/LocationSelection';
 import MapInterface from './components/MapInterface';
@@ -16,6 +17,7 @@ import { motion } from 'motion/react';
 type Screen = 'login' | 'location' | 'map' | 'admin';
 
 export default function App() {
+  const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
 
@@ -79,9 +81,9 @@ export default function App() {
         body: JSON.stringify(newLoc),
       });
       setLocations([newLoc, ...locations]);
-      showToast('Street added successfully');
+      showToast(t.streetAdded);
     } catch {
-      showToast('Failed to add street');
+      showToast(t.failedAddStreet);
     }
   };
 
@@ -93,9 +95,9 @@ export default function App() {
         body: JSON.stringify(data),
       });
       setLocations(locations.map(loc => loc.id === id ? { ...loc, ...data } : loc));
-      showToast('Street updated successfully');
+      showToast(t.streetUpdated);
     } catch {
-      showToast('Failed to update street');
+      showToast(t.failedUpdateStreet);
     }
   };
 
@@ -104,9 +106,9 @@ export default function App() {
       await fetch(`/api/streets/${id}`, { method: 'DELETE', headers: authHeaders() });
       setLocations(locations.filter(loc => loc.id !== id));
       setDeletingLocation(null);
-      showToast('Street deleted successfully');
+      showToast(t.streetDeleted);
     } catch {
-      showToast('Failed to delete street');
+      showToast(t.failedDeleteStreet);
     }
   };
 
@@ -125,7 +127,7 @@ export default function App() {
   const handleAddVendorClick = () => {
     setIsAddingVendor(!isAddingVendor);
     if (!isAddingVendor) {
-      showToast('Tap on the map to place a vendor');
+      showToast(t.tapToPlaceVendor);
     }
   };
 
@@ -144,7 +146,7 @@ export default function App() {
     setSelectedVendor(null);           // close bottom sheet
     setPinPlacementVendor(vendor);
     setPinPlacementMode(true);
-    showToast('Tap the map to place pin');
+    showToast(t.tapMapToPlacePin);
   };
 
   const handlePinPlacementTap = (lat: number, lon: number) => {
@@ -168,9 +170,9 @@ export default function App() {
       });
       const data = await res.json();
       setVendors(data);
-      showToast('Pin location saved');
+      showToast(t.pinSaved);
     } catch {
-      showToast('Failed to save pin location');
+      showToast(t.failedSavePin);
     } finally {
       setPinPlacementMode(false);
       setPinPlacementVendor(null);
@@ -195,11 +197,11 @@ export default function App() {
       setVendors(data);
       setIsAddingVendor(false);
       const toastMsg = currentUser?.role === 'foodvendor'
-        ? 'Vendor request submitted!'
-        : 'Vendor added successfully';
+        ? t.vendorRequestSubmitted
+        : t.vendorAdded;
       showToast(toastMsg);
     } catch {
-      showToast('Failed to add vendor');
+      showToast(t.failedAddVendor);
     }
   };
 
@@ -308,7 +310,7 @@ export default function App() {
       <VendorBottomSheet
         vendor={selectedVendor}
         onClose={() => setSelectedVendor(null)}
-        onShare={() => showToast('Link copied to clipboard!')}
+        onShare={() => showToast(t.linkCopied)}
         currentUser={currentUser}
         authHeaders={authHeaders}
         hasMap={!!(selectedLocation?.map_image_path &&

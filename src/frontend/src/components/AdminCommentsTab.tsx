@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Trash2, RefreshCw, Star } from 'lucide-react';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   authHeaders: () => Record<string, string>;
 }
 
 export default function AdminCommentsTab({ authHeaders }: Props) {
+  const { t } = useLanguage();
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ export default function AdminCommentsTab({ authHeaders }: Props) {
   useEffect(() => { fetchComments(); }, []);
 
   const handleDelete = async (comment: any) => {
-    if (!confirm('Delete this comment?')) return;
+    if (!confirm(t.deleteCommentConfirm)) return;
     await fetch(`/api/vendors/${comment.vendor_id}/comments/${comment.id}`, {
       method: 'DELETE',
       headers: authHeaders(),
@@ -39,14 +41,14 @@ export default function AdminCommentsTab({ authHeaders }: Props) {
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">All Comments</h2>
+        <h2 className="text-xl font-bold text-gray-900">{t.allComments}</h2>
         <button onClick={fetchComments} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
       <div className="space-y-3">
         {comments.length === 0 && (
-          <p className="text-center text-gray-400 py-8">No comments yet</p>
+          <p className="text-center text-gray-400 py-8">{t.noCommentsYet}</p>
         )}
         {comments.map(comment => (
           <div key={comment.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Trash2 } from 'lucide-react';
 import { Comment, CurrentUser } from '../types';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   comments: Comment[];
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function VendorCommentsList({ comments, currentUser, vendorId, authHeaders, onDeleted }: Props) {
+  const { t } = useLanguage();
   const handleDelete = async (commentId: string) => {
     try {
       await fetch(`/api/vendors/${vendorId}/comments/${commentId}`, {
@@ -25,7 +27,7 @@ export default function VendorCommentsList({ comments, currentUser, vendorId, au
 
   if (comments.length === 0) {
     return (
-      <p className="text-gray-400 text-sm text-center py-4">No reviews yet. Be the first!</p>
+      <p className="text-gray-400 text-sm text-center py-4">{t.noReviewsYet}</p>
     );
   }
 

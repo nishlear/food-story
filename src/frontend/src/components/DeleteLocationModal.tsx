@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle } from 'lucide-react';
+import { useLanguage, interpolate } from '../i18n/context';
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function DeleteLocationModal({ isOpen, onClose, onConfirm, location }: Props) {
+  const { t } = useLanguage();
   return (
     <AnimatePresence>
       {isOpen && (
@@ -20,13 +22,13 @@ export default function DeleteLocationModal({ isOpen, onClose, onConfirm, locati
               <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Food Street?</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{t.deleteFoodStreet}</h3>
               <p className="text-gray-600 mb-6">
-                Are you sure you want to completely delete <strong>{location?.name}</strong> and all of its vendors? This action cannot be undone.
+                {interpolate(t.deleteLocationConfirm, { name: location?.name ?? '' })}
               </p>
               <div className="flex gap-3 w-full">
-                <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-semibold">Cancel</button>
-                <button onClick={() => onConfirm(location?.id)} className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold shadow-md shadow-red-600/20">Delete</button>
+                <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-semibold">{t.cancel}</button>
+                <button onClick={() => onConfirm(location?.id)} className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold shadow-md shadow-red-600/20">{t.delete}</button>
               </div>
             </div>
           </motion.div>

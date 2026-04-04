@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Volume2, VolumeX, Type, X, Lock } from 'lucide-react';
 import { CurrentUser } from '../types';
 import ChangePasswordModal from './ChangePasswordModal';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioEnabled, textSize, setTextSize, currentUser, authHeaders }: Props) {
+  const { t } = useLanguage();
   const [isChangePwOpen, setIsChangePwOpen] = useState(false);
 
   return (
@@ -37,7 +39,7 @@ export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioE
               className="absolute top-1/2 left-4 right-4 -translate-y-1/2 bg-white rounded-3xl shadow-2xl z-50 overflow-hidden"
             >
               <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="text-xl font-bold text-gray-900">Settings</h3>
+                <h3 className="text-xl font-bold text-gray-900">{t.settings}</h3>
                 <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full">
                   <X className="w-5 h-5" />
                 </button>
@@ -51,8 +53,8 @@ export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioE
                       {audioEnabled ? <Volume2 className="w-6 h-6" /> : <VolumeX className="w-6 h-6" />}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Narration Audio</p>
-                      <p className="text-sm text-gray-500">Auto-play when nearby</p>
+                      <p className="font-medium text-gray-900">{t.narrationAudio}</p>
+                      <p className="text-sm text-gray-500">{t.narrationAudioHint}</p>
                     </div>
                   </div>
                   <button
@@ -70,8 +72,8 @@ export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioE
                       <Type className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Text Size</p>
-                      <p className="text-sm text-gray-500">Adjust readability</p>
+                      <p className="font-medium text-gray-900">{t.textSize}</p>
+                      <p className="text-sm text-gray-500">{t.textSizeHint}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 px-2">
@@ -99,8 +101,8 @@ export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioE
                         <Lock className="w-6 h-6" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Change Password</p>
-                        <p className="text-sm text-gray-500">Update your account password</p>
+                        <p className="font-medium text-gray-900">{t.changePassword}</p>
+                        <p className="text-sm text-gray-500">{t.changePasswordHint}</p>
                       </div>
                     </button>
                   </div>

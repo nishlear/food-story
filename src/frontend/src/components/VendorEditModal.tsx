@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Store, MapPin } from 'lucide-react';
 import { CurrentUser } from '../types';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function VendorEditModal({ isOpen, onClose, vendor, streetId, authHeaders, onUpdated, hasMap, currentUser, onSetPinLocation }: Props) {
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState('');
@@ -82,7 +84,7 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
                 <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
                   <Store className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900">Edit Vendor</h3>
+                <h3 className="text-xl font-bold text-gray-900">{t.editVendor}</h3>
               </div>
               <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-600 bg-gray-50 rounded-full">
                 <X className="w-5 h-5" />
@@ -91,7 +93,7 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.name}</label>
                 <input
                   required
                   value={name}
@@ -100,7 +102,7 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.description}</label>
                 <textarea
                   value={description}
                   onChange={e => setDescription(e.target.value)}
@@ -109,12 +111,12 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URLs (one per line)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.imageUrlsLabel}</label>
                 <textarea
                   value={images}
                   onChange={e => setImages(e.target.value)}
                   rows={3}
-                  placeholder="https://example.com/image.jpg"
+                  placeholder={t.imageUrlsPlaceholder}
                   className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none text-sm font-mono"
                 />
               </div>
@@ -126,7 +128,7 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
                 disabled={loading}
                 className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
               >
-                {loading ? 'Saving…' : 'Save Changes'}
+                {loading ? t.saving : t.saveChanges}
               </button>
 
               {currentUser?.role === 'admin' && hasMap && onSetPinLocation && (
@@ -136,7 +138,7 @@ export default function VendorEditModal({ isOpen, onClose, vendor, streetId, aut
                   className="w-full border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
                 >
                   <MapPin className="w-4 h-4" />
-                  Set Location on Map
+                  {t.setLocationOnMap}
                 </button>
               )}
             </form>

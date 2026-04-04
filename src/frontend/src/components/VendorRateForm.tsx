@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   vendorId: string;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function VendorRateForm({ vendorId, authHeaders, onSubmitted }: Props) {
+  const { t } = useLanguage();
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [body, setBody] = useState('');
@@ -17,7 +19,7 @@ export default function VendorRateForm({ vendorId, authHeaders, onSubmitted }: P
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      setError('Please select a rating');
+      setError(t.selectRatingError);
       return;
     }
     setError('');
@@ -37,7 +39,7 @@ export default function VendorRateForm({ vendorId, authHeaders, onSubmitted }: P
       setBody('');
       onSubmitted();
     } catch {
-      setError('Connection error. Please try again.');
+      setError(t.connectionError);
     } finally {
       setLoading(false);
     }
@@ -47,7 +49,7 @@ export default function VendorRateForm({ vendorId, authHeaders, onSubmitted }: P
 
   return (
     <form onSubmit={handleSubmit} className="bg-orange-50 p-4 rounded-2xl space-y-3">
-      <p className="font-semibold text-gray-800 text-sm">Leave a Review</p>
+      <p className="font-semibold text-gray-800 text-sm">{t.leaveReview}</p>
 
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map(star => (
@@ -71,7 +73,7 @@ export default function VendorRateForm({ vendorId, authHeaders, onSubmitted }: P
         value={body}
         onChange={e => setBody(e.target.value)}
         rows={3}
-        placeholder="Share your experience…"
+        placeholder={t.shareExperience}
         className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none bg-white"
       />
 
@@ -82,7 +84,7 @@ export default function VendorRateForm({ vendorId, authHeaders, onSubmitted }: P
         disabled={loading}
         className="w-full bg-orange-500 text-white py-2.5 rounded-xl font-semibold text-sm shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-colors disabled:opacity-60"
       >
-        {loading ? 'Submitting…' : 'Submit Review'}
+        {loading ? t.submitting : t.submitReview}
       </button>
     </form>
   );

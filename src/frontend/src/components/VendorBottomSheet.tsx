@@ -5,6 +5,7 @@ import { CurrentUser, Comment } from '../types';
 import VendorRateForm from './VendorRateForm';
 import VendorCommentsList from './VendorCommentsList';
 import VendorEditModal from './VendorEditModal';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   vendor: any;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation }: Props) {
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -111,14 +113,14 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
             <div className="flex gap-3 px-6 py-4">
               <button className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
                 <Navigation className="w-5 h-5" />
-                Get Directions
+                {t.getDirections}
               </button>
               <button
                 onClick={onShare}
                 className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform"
               >
                 <Share2 className="w-5 h-5" />
-                Share
+                {t.share}
               </button>
             </div>
 
@@ -143,9 +145,9 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               )}
 
               <div className="py-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">About</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">{t.about}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  {vendor.description || 'A legendary spot known for its authentic flavors and secret family recipes passed down through generations. The aroma alone is enough to draw a crowd from blocks away.'}
+                  {vendor.description || t.defaultDescription}
                 </p>
               </div>
 
@@ -161,7 +163,7 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               )}
 
               <div className="py-4 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Reviews</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t.reviews}</h3>
                 <VendorCommentsList
                   comments={comments}
                   currentUser={currentUser}

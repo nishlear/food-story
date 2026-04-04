@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Plus, Edit2, Trash2, LogOut, ShieldCheck } from 'lucide-react';
 import { CurrentUser } from '../types';
+import { useLanguage, interpolate, plural } from '../i18n/context';
 
 interface Props {
   locations: any[];
@@ -20,14 +21,15 @@ const roleBadgeStyle: Record<string, string> = {
   user: 'bg-green-100 text-green-700',
 };
 
-const roleLabel: Record<string, string> = {
-  admin: 'Admin',
-  foodvendor: 'Vendor',
-  user: 'User',
-};
-
 export default function LocationSelection({ locations, onSelect, onAddClick, onEditClick, onDeleteClick, currentUser, onLogout, onGoToAdmin }: Props) {
+  const { t } = useLanguage();
   const isAdmin = currentUser?.role === 'admin';
+
+  const roleLabel: Record<string, string> = {
+    admin: t.roleAdmin,
+    foodvendor: t.roleVendor,
+    user: t.roleUser,
+  };
 
   return (
     <motion.div
@@ -38,8 +40,8 @@ export default function LocationSelection({ locations, onSelect, onAddClick, onE
     >
       <div className="pt-12 pb-6 px-6 bg-orange-500 text-white shadow-md z-10 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Where are you?</h1>
-          <p className="opacity-80 mt-2">Select a street food haven</p>
+          <h1 className="text-3xl font-bold">{t.whereAreYou}</h1>
+          <p className="opacity-80 mt-2">{t.selectStreetHaven}</p>
         </div>
         <div className="flex items-center gap-2">
           {currentUser && (
@@ -52,7 +54,7 @@ export default function LocationSelection({ locations, onSelect, onAddClick, onE
               <button
                 onClick={onGoToAdmin}
                 className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-                title="Admin Panel"
+                title={t.adminPanelTitle}
               >
                 <ShieldCheck className="w-5 h-5" />
               </button>
@@ -67,7 +69,7 @@ export default function LocationSelection({ locations, onSelect, onAddClick, onE
           <button
             onClick={onLogout}
             className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-            title="Logout"
+            title={t.logout}
           >
             <LogOut className="w-5 h-5" />
           </button>
@@ -87,7 +89,7 @@ export default function LocationSelection({ locations, onSelect, onAddClick, onE
             </div>
             <div className="flex flex-col items-end">
               <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded-full mb-2">
-                {loc.vendors_count || 0} vendors
+                {interpolate(plural(loc.vendors_count || 0, t.vendorCountOne, t.vendorCountMany), { count: loc.vendors_count || 0 })}
               </span>
               {isAdmin && (
                 <div className="flex items-center gap-2">

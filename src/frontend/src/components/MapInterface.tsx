@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, ChevronLeft, Settings, Globe, Plus, Minus, LocateFixed, LocateOff, Loader } from 'lucide-react';
+import { MapPin, ChevronLeft, Settings, Plus, Minus, LocateFixed, LocateOff, Loader } from 'lucide-react';
+import LanguagePicker from './LanguagePicker';
+import { useLanguage, interpolate } from '../i18n/context';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { projectVendorToPercent, percentToLatLon } from '../utils/geoProjection';
 import { CurrentUser } from '../types';
@@ -27,6 +29,7 @@ interface Props {
 }
 
 export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName }: Props) {
+  const { t } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
   const imgContainerRef = useRef<HTMLDivElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -146,7 +149,7 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
           {/* Error state */}
           {imgError && (
             <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-500 z-0">
-              Map failed to load. Refresh to retry.
+              {t.mapFailedToLoad}
             </div>
           )}
           <TransformWrapper
@@ -262,7 +265,9 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                 {pinPlacementMode && !candidatePin && (
                   <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
                     <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-white/50 text-sm text-gray-700 whitespace-nowrap">
-                      Tap the map to place pin{pinPlacementVendorName ? ` for ${pinPlacementVendorName}` : ''}
+                      {pinPlacementVendorName
+                        ? interpolate(t.tapMapToPlacePinFor, { name: pinPlacementVendorName })
+                        : t.tapMapToPlacePin}
                     </div>
                   </div>
                 )}
@@ -271,7 +276,7 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                 {candidatePin && (
                   <div className="absolute bottom-16 left-4 right-4 z-40">
                     <div className="bg-white rounded-2xl shadow-xl p-4 flex flex-col gap-3">
-                      <p className="font-semibold text-gray-900 text-center">Place pin here?</p>
+                      <p className="font-semibold text-gray-900 text-center">{t.placePinHere}</p>
                       {pinPlacementVendorName && (
                         <p className="text-sm text-gray-500 text-center">{pinPlacementVendorName}</p>
                       )}
@@ -280,13 +285,13 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                           onClick={onCancelPin}
                           className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-semibold text-sm hover:bg-gray-200 transition-colors"
                         >
-                          Cancel
+                          {t.cancel}
                         </button>
                         <button
                           onClick={onConfirmPin}
                           className="flex-1 py-2.5 rounded-xl bg-orange-500 text-white font-semibold text-sm hover:bg-orange-600 transition-colors shadow-md shadow-orange-500/20"
                         >
-                          Confirm
+                          {t.confirm}
                         </button>
                       </div>
                     </div>
@@ -302,12 +307,7 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                   >
                     <Settings className="w-6 h-6" />
                   </button>
-                  <button
-                    aria-label="Language"
-                    className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <Globe className="w-6 h-6" />
-                  </button>
+                  <LanguagePicker />
                   {canAddVendor && (
                     <button
                       onClick={undefined}
@@ -405,11 +405,7 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
             >
               <Settings className="w-6 h-6" />
             </button>
-            <button
-              className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Globe className="w-6 h-6" />
-            </button>
+            <LanguagePicker />
             {canAddVendor && (
               <button
                 onClick={onAddVendorClick}
