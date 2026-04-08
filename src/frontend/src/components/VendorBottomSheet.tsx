@@ -19,9 +19,10 @@ interface Props {
   onSetPinLocation?: (vendor: Vendor) => void;
   onVendorUpdated?: (vendor: Vendor) => void;
   tts: UseTTSReturn;
+  ttsRate?: number;
 }
 
-export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, tts }: Props) {
+export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, tts, ttsRate = 1.0 }: Props) {
   const { t, language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -114,7 +115,7 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
                   onClick={() =>
                     tts.isPlaying && tts.currentVendorId === vendor.id
                       ? tts.stop()
-                      : tts.play(description || vendor.name, language, vendor.id)
+                      : tts.play(description || vendor.name, language, vendor.id, ttsRate)
                   }
                   className="p-2 bg-orange-100 text-orange-600 rounded-full hover:bg-orange-200 transition-colors"
                 >

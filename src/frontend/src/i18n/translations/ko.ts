@@ -208,4 +208,6 @@ export const ko: Translations = {
   disable: '비활성화',
   keepEnabled: '계속 사용',
   transitionPhrase: '{from}을(를) 떠나 {to}을(를) 소개합니다',
+  ttsSpeedLabel: '내레이션 속도',
+  ttsSpeedHint: '음성이 설명을 읽는 속도',
 };

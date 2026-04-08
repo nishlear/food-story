@@ -48,6 +48,10 @@ export default function App() {
     return stored ? Number(stored) : 60;
   });
   const [textSize, setTextSize] = useState(16);
+  const [ttsRate, setTtsRate] = useState<number>(() => {
+    const stored = localStorage.getItem('food-story-tts-rate');
+    return stored ? Number(stored) : 1.0;
+  });
   const [showGpsWarning, setShowGpsWarning] = useState(false);
   const tts = useTTS();
 
@@ -72,6 +76,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('food-story-cooldown', String(narrationCooldown));
   }, [narrationCooldown]);
+
+  useEffect(() => {
+    localStorage.setItem('food-story-tts-rate', String(ttsRate));
+  }, [ttsRate]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -278,6 +286,7 @@ export default function App() {
             pinPlacementVendorName={pinPlacementVendor?.name}
             audioEnabled={audioEnabled}
             narrationCooldown={narrationCooldown}
+            ttsRate={ttsRate}
             tts={tts}
             onGpsAccuracyWarning={() => setShowGpsWarning(true)}
           />
@@ -329,6 +338,8 @@ export default function App() {
         setAudioEnabled={setAudioEnabled}
         narrationCooldown={narrationCooldown}
         setNarrationCooldown={setNarrationCooldown}
+        ttsRate={ttsRate}
+        setTtsRate={setTtsRate}
         textSize={textSize}
         setTextSize={setTextSize}
         currentUser={currentUser}
@@ -349,6 +360,7 @@ export default function App() {
         onSetPinLocation={handleSetPinLocation}
         onVendorUpdated={handleVendorUpdated}
         tts={tts}
+        ttsRate={ttsRate}
       />
 
       {/* GPS Low Accuracy Warning */}

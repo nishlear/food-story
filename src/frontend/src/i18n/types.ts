@@ -196,6 +196,8 @@ export interface Translations {
   // --- TTS Settings ---
   cooldownLabel: string;
   cooldownHint: string;
+  ttsSpeedLabel: string;
+  ttsSpeedHint: string;
   cooldown5min: string;
   cooldown10min: string;
   cooldown20min: string;

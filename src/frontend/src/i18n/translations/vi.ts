@@ -208,4 +208,6 @@ export const vi: Translations = {
   disable: 'Tắt',
   keepEnabled: 'Giữ bật',
   transitionPhrase: 'Bạn vừa rời {from}, giờ giới thiệu {to}',
+  ttsSpeedLabel: 'Tốc độ đọc',
+  ttsSpeedHint: 'Tốc độ giọng đọc mô tả quán',
 };

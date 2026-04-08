@@ -208,4 +208,6 @@ export const en: Translations = {
   disable: 'Disable',
   keepEnabled: 'Keep Enabled',
   transitionPhrase: 'You just left {from}, now introducing {to}',
+  ttsSpeedLabel: 'Narration speed',
+  ttsSpeedHint: 'How fast the voice reads vendor descriptions',
 };

@@ -608,20 +608,36 @@ const EDGE_TTS_VOICES: Record<string, string> = {
   es: 'es-ES-ElviraNeural',
 };
 
-async function generateVendorAudio(vendorId: string, descriptions: Record<string, string>) {
-  for (const [lang, text] of Object.entries(descriptions)) {
-    if (!text || !EDGE_TTS_VOICES[lang]) continue;
-    const outPath = path.join(audioDir, `${vendorId}_${lang}.mp3`);
+async function generateSingleAudio(vendorId: string, lang: string, text: string, retries = 3): Promise<void> {
+  const outPath = path.join(audioDir, `${vendorId}_${lang}.mp3`);
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       await execFileAsync('edge-tts', [
         '--voice', EDGE_TTS_VOICES[lang],
         '--text', text,
         '--write-media', outPath,
       ]);
+      if (fs.existsSync(outPath) && fs.statSync(outPath).size === 0) {
+        fs.unlinkSync(outPath);
+        throw new Error('edge-tts wrote 0 bytes');
+      }
       console.log(`Generated audio: ${outPath}`);
+      return;
     } catch (e) {
-      console.error(`TTS gen failed for ${vendorId}/${lang}:`, e);
+      if (fs.existsSync(outPath)) fs.unlinkSync(outPath);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * attempt));
+      } else {
+        console.error(`TTS gen failed for ${vendorId}/${lang} after ${retries} attempts:`, e);
+      }
     }
+  }
+}
+
+async function generateVendorAudio(vendorId: string, descriptions: Record<string, string>) {
+  for (const [lang, text] of Object.entries(descriptions)) {
+    if (!text || !EDGE_TTS_VOICES[lang]) continue;
+    await generateSingleAudio(vendorId, lang, text);
   }
 }
 
@@ -681,6 +697,29 @@ async function startServer() {
   }
   app.listen(3000, '0.0.0.0', () => {
     console.log('Server running on http://localhost:3000');
+  });
+
+  // Scan all vendors and generate missing audio files in the background
+  setImmediate(async () => {
+    const vendors = db.prepare('SELECT id, description FROM vendors').all() as { id: string; description: string | null }[];
+    console.log(`[TTS] Scanning ${vendors.length} vendors for missing audio...`);
+    for (const vendor of vendors) {
+      const translations = normalizeDescriptionTranslations(vendor.description);
+      const missing: Record<string, string> = {};
+      for (const [lang, text] of Object.entries(translations)) {
+        if (!text || !EDGE_TTS_VOICES[lang]) continue;
+        const filePath = path.join(audioDir, `${vendor.id}_${lang}.mp3`);
+        if (!fs.existsSync(filePath) || fs.statSync(filePath).size === 0) {
+          missing[lang] = text;
+        }
+      }
+      if (Object.keys(missing).length > 0) {
+        await generateVendorAudio(vendor.id, missing).catch(err =>
+          console.error(`[TTS] Failed for vendor ${vendor.id}:`, err)
+        );
+      }
+    }
+    console.log('[TTS] Startup audio scan complete.');
   });
 }
 

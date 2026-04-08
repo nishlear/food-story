@@ -208,4 +208,6 @@ export const ja: Translations = {
   disable: '無効にする',
   keepEnabled: '有効のまま',
   transitionPhrase: '{from}を離れました。次は{to}をご紹介します',
+  ttsSpeedLabel: 'ナレーション速度',
+  ttsSpeedHint: '音声が説明を読む速さ',
 };

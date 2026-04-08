@@ -208,4 +208,6 @@ export const zhTW: Translations = {
   disable: '停用',
   keepEnabled: '保持啟用',
   transitionPhrase: '您剛剛離開了{from}，現在為您介紹{to}',
+  ttsSpeedLabel: '朗讀速度',
+  ttsSpeedHint: '語音朗讀描述的速度',
 };

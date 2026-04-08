@@ -1,5 +1,15 @@
 import { useEffect, useRef } from 'react';
 import { Language } from '../i18n/types';
+
+function getVoiceForLanguage(language: Language): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  return (
+    voices.find((v) => v.lang === language) ??
+    voices.find((v) => v.lang.startsWith(language + '-')) ??
+    voices.find((v) => v.lang.startsWith(language)) ??
+    null
+  );
+}
 import { GeoPosition } from './useGeolocation';
 import { UseTTSReturn } from './useTTS';
 import { haversine } from '../utils/haversine';
@@ -18,6 +28,7 @@ interface ProximityNarrationOptions {
   audioEnabled: boolean;
   cooldownMinutes: number; // 0 = never auto-trigger
   language: Language;
+  ttsRate: number;
   tts: UseTTSReturn;
   translations: { transitionPhrase: string };
   onGpsAccuracyWarning?: () => void;
@@ -30,6 +41,7 @@ export function useProximityNarration(options: ProximityNarrationOptions): void 
     audioEnabled,
     cooldownMinutes,
     language,
+    ttsRate,
     tts,
     translations,
     onGpsAccuracyWarning,
@@ -52,6 +64,7 @@ export function useProximityNarration(options: ProximityNarrationOptions): void 
         audioEnabled,
         cooldownMinutes,
         language,
+        ttsRate,
         tts,
         translations,
         onGpsAccuracyWarning,
@@ -127,7 +140,7 @@ export function useProximityNarration(options: ProximityNarrationOptions): void 
         const toVendor = candidate;
 
         if (!fromVendor) {
-          tts.play(toVendor.description || toVendor.name, language, toVendor.id);
+          tts.play(toVendor.description || toVendor.name, language, toVendor.id, ttsRate);
         } else {
           const phrase = translations.transitionPhrase
             .replace('{from}', fromVendor.name)
@@ -135,14 +148,17 @@ export function useProximityNarration(options: ProximityNarrationOptions): void 
 
           const utterance = new SpeechSynthesisUtterance(phrase);
           utterance.lang = language;
-          utterance.onend = () => tts.play(toVendor.description || toVendor.name, language, toVendor.id);
-          utterance.onerror = () => tts.play(toVendor.description || toVendor.name, language, toVendor.id);
+          utterance.rate = ttsRate;
+          const voice = getVoiceForLanguage(language);
+          if (voice) utterance.voice = voice;
+          utterance.onend = () => tts.play(toVendor.description || toVendor.name, language, toVendor.id, ttsRate);
+          utterance.onerror = () => tts.play(toVendor.description || toVendor.name, language, toVendor.id, ttsRate);
 
           window.speechSynthesis.cancel();
           window.speechSynthesis.speak(utterance);
         }
       } else {
-        tts.play(candidate.description || candidate.name, language, candidate.id);
+        tts.play(candidate.description || candidate.name, language, candidate.id, ttsRate);
       }
 
       cooldownMap.current.set(candidate.id, Date.now());

@@ -32,11 +32,12 @@ interface Props {
   // TTS / proximity props
   audioEnabled?: boolean;
   narrationCooldown?: number;
+  ttsRate?: number;
   tts?: UseTTSReturn;
   onGpsAccuracyWarning?: () => void;
 }
 
-export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName, audioEnabled = false, narrationCooldown = 60, tts, onGpsAccuracyWarning }: Props) {
+export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName, audioEnabled = false, narrationCooldown = 60, ttsRate = 1.0, tts, onGpsAccuracyWarning }: Props) {
   const { t, language } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
   const imgContainerRef = useRef<HTMLDivElement>(null);
@@ -56,6 +57,7 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
     audioEnabled,
     cooldownMinutes: narrationCooldown,
     language: language as Language,
+    ttsRate,
     tts: tts ?? noopTTS,
     translations: { transitionPhrase: t.transitionPhrase },
     onGpsAccuracyWarning,

@@ -208,4 +208,6 @@ export const zhCN: Translations = {
   disable: '禁用',
   keepEnabled: '保持开启',
   transitionPhrase: '您刚刚离开了{from}，现在为您介绍{to}',
+  ttsSpeedLabel: '朗读速度',
+  ttsSpeedHint: '语音朗读描述的速度',
 };

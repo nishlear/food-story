@@ -208,4 +208,6 @@ export const es: Translations = {
   disable: 'Desactivar',
   keepEnabled: 'Mantener activada',
   transitionPhrase: 'Acabas de salir de {from}, ahora presentamos {to}',
+  ttsSpeedLabel: 'Velocidad de narración',
+  ttsSpeedHint: 'Qué tan rápido la voz lee las descripciones',
 };
