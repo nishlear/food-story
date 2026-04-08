@@ -192,4 +192,20 @@ export const ja: Translations = {
 
   // Language Picker
   languageLabel: '言語',
+
+  // TTS Settings
+  cooldownLabel: '自動ナレーションのクールダウン',
+  cooldownHint: '同じ店舗を再ナレーションするまでの時間',
+  cooldown5min: '5分',
+  cooldown10min: '10分',
+  cooldown20min: '20分',
+  cooldown30min: '30分',
+  cooldown1hr: '1時間',
+  cooldownNever: '自動トリガーなし',
+  gpsAccuracyWarning: 'GPSの精度が低い場合、この機能が正常に動作しない場合があります',
+  gpsLowAccuracyTitle: 'GPS精度が低下',
+  gpsLowAccuracyMessage: 'GPSの精度が低くなっています。自動ナレーションが正常に動作しない可能性があります。無効にしますか？',
+  disable: '無効にする',
+  keepEnabled: '有効のまま',
+  transitionPhrase: '{from}を離れました。次は{to}をご紹介します',
 };

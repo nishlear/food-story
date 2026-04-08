@@ -192,4 +192,20 @@ export const es: Translations = {
 
   // Language Picker
   languageLabel: 'Idioma',
+
+  // TTS Settings
+  cooldownLabel: 'Tiempo de espera de narración automática',
+  cooldownHint: 'Tiempo antes de volver a narrar el mismo puesto',
+  cooldown5min: '5 minutos',
+  cooldown10min: '10 minutos',
+  cooldown20min: '20 minutos',
+  cooldown30min: '30 minutos',
+  cooldown1hr: '1 hora',
+  cooldownNever: 'No activar automáticamente',
+  gpsAccuracyWarning: 'Si el GPS no es suficientemente preciso, esta función podría no funcionar',
+  gpsLowAccuracyTitle: 'Baja precisión GPS',
+  gpsLowAccuracyMessage: 'La precisión del GPS es baja. La narración automática puede no funcionar correctamente. ¿Deseas desactivarla?',
+  disable: 'Desactivar',
+  keepEnabled: 'Mantener activada',
+  transitionPhrase: 'Acabas de salir de {from}, ahora presentamos {to}',
 };

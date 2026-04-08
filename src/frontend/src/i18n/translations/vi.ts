@@ -192,4 +192,20 @@ export const vi: Translations = {
 
   // Language Picker
   languageLabel: 'Ngôn ngữ',
+
+  // TTS Settings
+  cooldownLabel: 'Thời gian chờ tự động thuyết minh',
+  cooldownHint: 'Thời gian trước khi thuyết minh lại cùng một quán',
+  cooldown5min: '5 phút',
+  cooldown10min: '10 phút',
+  cooldown20min: '20 phút',
+  cooldown30min: '30 phút',
+  cooldown1hr: '1 giờ',
+  cooldownNever: 'Không tự động kích hoạt',
+  gpsAccuracyWarning: 'Nếu GPS không đủ chính xác, tính năng này có thể không hoạt động',
+  gpsLowAccuracyTitle: 'Độ chính xác GPS thấp',
+  gpsLowAccuracyMessage: 'Độ chính xác GPS thấp. Tự động thuyết minh có thể không hoạt động đúng. Bạn có muốn tắt không?',
+  disable: 'Tắt',
+  keepEnabled: 'Giữ bật',
+  transitionPhrase: 'Bạn vừa rời {from}, giờ giới thiệu {to}',
 };

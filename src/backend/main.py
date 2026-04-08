@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import os
@@ -6,7 +7,8 @@ from typing import Dict, List, Optional
 from urllib import error as urllib_error
 from urllib import request as urllib_request
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+import edge_tts
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -296,6 +298,47 @@ app.add_middleware(
 _maps_dir = os.path.join(os.path.dirname(__file__), "..", "static", "maps")
 os.makedirs(_maps_dir, exist_ok=True)
 app.mount("/maps", StaticFiles(directory=_maps_dir), name="maps")
+
+# Static audio file serving
+_audio_dir = os.path.join(os.path.dirname(__file__), "..", "static", "audio")
+os.makedirs(_audio_dir, exist_ok=True)
+app.mount("/audio", StaticFiles(directory=_audio_dir), name="audio")
+
+EDGE_TTS_VOICES = {
+    "en": "en-US-GuyNeural",
+    "vi": "vi-VN-HoaiMyNeural",
+    "ko": "ko-KR-SunHiNeural",
+    "ja": "ja-JP-NanamiNeural",
+    "zh-CN": "zh-CN-XiaoxiaoNeural",
+    "zh-TW": "zh-TW-HsiaoChenNeural",
+    "es": "es-ES-ElviraNeural",
+}
+
+
+async def _generate_single_audio(vendor_id: str, lang: str, text: str):
+    voice = EDGE_TTS_VOICES.get(lang)
+    if not voice or not text:
+        return
+    out_path = os.path.join(_audio_dir, f"{vendor_id}_{lang}.mp3")
+    try:
+        communicate = edge_tts.Communicate(text, voice)
+        await communicate.save(out_path)
+        print(f"Generated audio: {out_path}")
+    except Exception as e:
+        print(f"TTS generation failed for {vendor_id}/{lang}: {e}")
+
+
+def generate_vendor_audio(vendor_id: str, description_translations: dict):
+    async def _run():
+        tasks = [
+            _generate_single_audio(vendor_id, lang, text)
+            for lang, text in description_translations.items()
+            if text
+        ]
+        await asyncio.gather(*tasks)
+
+    asyncio.run(_run())
+
 
 from map_utils import generate_map_png
 
@@ -751,6 +794,7 @@ def list_vendors(
 def add_vendor(
     street_id: str,
     vendor: FoodVendorCreate,
+    background_tasks: BackgroundTasks,
     current_user: dict = Depends(require_vendor_or_admin),
     db: Session = Depends(get_db),
 ):
@@ -774,6 +818,8 @@ def add_vendor(
     db.add(db_vendor)
     db.commit()
     db.refresh(db_vendor)
+    translations = normalize_description_translations(db_vendor.description)
+    background_tasks.add_task(generate_vendor_audio, str(vendor_id), translations)
     return normalize_vendor_response(db_vendor)
 
 
@@ -796,6 +842,15 @@ def get_vendor(
     return normalize_vendor_response(v)
 
 
+@app.get("/api/vendors/{vendor_id}/audio-status")
+def get_vendor_audio_status(vendor_id: str):
+    languages = [
+        lang for lang in EDGE_TTS_VOICES
+        if os.path.exists(os.path.join(_audio_dir, f"{vendor_id}_{lang}.mp3"))
+    ]
+    return {"languages": languages}
+
+
 @app.put(
     "/streets/{street_id}/vendors/{vendor_id}", response_model=FoodVendorResponse
 )
@@ -803,6 +858,7 @@ def update_vendor(
     street_id: str,
     vendor_id: str,
     vendor: FoodVendorBase,
+    background_tasks: BackgroundTasks,
     current_user: dict = Depends(require_authenticated),
     db: Session = Depends(get_db),
 ):
@@ -843,6 +899,8 @@ def update_vendor(
 
     db.commit()
     db.refresh(db_vendor)
+    translations = normalize_description_translations(db_vendor.description)
+    background_tasks.add_task(generate_vendor_audio, str(vendor_id), translations)
     return normalize_vendor_response(db_vendor)
 
 

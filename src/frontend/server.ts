@@ -429,6 +429,9 @@ app.post('/api/streets/:id/vendors', async (req, res) => {
   db.prepare('INSERT INTO vendors (id, street_id, name, description, rating, reviews, x, y, type, address, images, owner_username, lat, lon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
     .run(id, req.params.id, name, serializeDescriptionTranslations(descriptionTranslations), rating, reviews, x, y, type, address, JSON.stringify(images || []), owner_username, lat ?? null, lon ?? null);
   const createdVendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(id) as any;
+  generateVendorAudio(id, descriptionTranslations as Record<string, string>).catch(err =>
+    console.error('Audio generation error:', err)
+  );
   res.status(201).json(normalizeVendorRecord(createdVendor));
 });
 
@@ -446,6 +449,9 @@ app.put('/api/streets/:streetId/vendors/:vendorId', async (req, res) => {
     db.prepare('UPDATE vendors SET name = ?, description = ?, images = ?, owner_username = ?, rating = ?, reviews = ?, x = ?, y = ?, type = ?, address = ?, lat = ?, lon = ? WHERE id = ?')
       .run(name, serializeDescriptionTranslations(nextDescription), JSON.stringify(images || []), owner_username || null, rating, reviews, x, y, type, address, lat ?? null, lon ?? null, req.params.vendorId);
     const updatedVendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+    generateVendorAudio(req.params.vendorId, nextDescription as Record<string, string>).catch(err =>
+      console.error('Audio generation error:', err)
+    );
     return res.json(normalizeVendorRecord(updatedVendor));
   }
 
@@ -455,6 +461,9 @@ app.put('/api/streets/:streetId/vendors/:vendorId', async (req, res) => {
     db.prepare('UPDATE vendors SET name = ?, description = ?, images = ? WHERE id = ?')
       .run(name, serializeDescriptionTranslations(nextDescription), JSON.stringify(images || []), req.params.vendorId);
     const updatedVendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+    generateVendorAudio(req.params.vendorId, nextDescription as Record<string, string>).catch(err =>
+      console.error('Audio generation error:', err)
+    );
     return res.json(normalizeVendorRecord(updatedVendor));
   }
 
@@ -583,6 +592,50 @@ app.get('/api/admin/comments', (req, res) => {
 const mapsDir = path.join(process.cwd(), 'static', 'maps');
 fs.mkdirSync(mapsDir, { recursive: true });
 app.use('/maps', express.static(mapsDir));
+
+// --- Static Audio Serving ---
+const audioDir = path.join(process.cwd(), 'static', 'audio');
+fs.mkdirSync(audioDir, { recursive: true });
+app.use('/audio', express.static(audioDir));
+
+const EDGE_TTS_VOICES: Record<string, string> = {
+  en: 'en-US-GuyNeural',
+  vi: 'vi-VN-HoaiMyNeural',
+  ko: 'ko-KR-SunHiNeural',
+  ja: 'ja-JP-NanamiNeural',
+  'zh-CN': 'zh-CN-XiaoxiaoNeural',
+  'zh-TW': 'zh-TW-HsiaoChenNeural',
+  es: 'es-ES-ElviraNeural',
+};
+
+async function generateVendorAudio(vendorId: string, descriptions: Record<string, string>) {
+  for (const [lang, text] of Object.entries(descriptions)) {
+    if (!text || !EDGE_TTS_VOICES[lang]) continue;
+    const outPath = path.join(audioDir, `${vendorId}_${lang}.mp3`);
+    try {
+      await execFileAsync('edge-tts', [
+        '--voice', EDGE_TTS_VOICES[lang],
+        '--text', text,
+        '--write-media', outPath,
+      ]);
+      console.log(`Generated audio: ${outPath}`);
+    } catch (e) {
+      console.error(`TTS gen failed for ${vendorId}/${lang}:`, e);
+    }
+  }
+}
+
+app.get('/api/vendors/:vendorId/audio-status', (req, res) => {
+  const { vendorId } = req.params;
+  const languages: string[] = [];
+  for (const lang of Object.keys(EDGE_TTS_VOICES)) {
+    const filePath = path.join(audioDir, `${vendorId}_${lang}.mp3`);
+    if (fs.existsSync(filePath)) {
+      languages.push(lang);
+    }
+  }
+  res.json({ languages });
+});
 
 // Prefer uv-managed venv python (has staticmap), fall back to system python3
 const pythonExe = (() => {

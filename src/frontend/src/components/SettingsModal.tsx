@@ -10,13 +10,15 @@ interface Props {
   onClose: () => void;
   audioEnabled: boolean;
   setAudioEnabled: (v: boolean) => void;
+  narrationCooldown: number;
+  setNarrationCooldown: (v: number) => void;
   textSize: number;
   setTextSize: (v: number) => void;
   currentUser: CurrentUser | null;
   authHeaders: () => Record<string, string>;
 }
 
-export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioEnabled, textSize, setTextSize, currentUser, authHeaders }: Props) {
+export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioEnabled, narrationCooldown, setNarrationCooldown, textSize, setTextSize, currentUser, authHeaders }: Props) {
   const { t } = useLanguage();
   const [isChangePwOpen, setIsChangePwOpen] = useState(false);
 
@@ -64,6 +66,30 @@ export default function SettingsModal({ isOpen, onClose, audioEnabled, setAudioE
                     <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${audioEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                   </button>
                 </div>
+                <p className="text-xs text-amber-600 mt-1 ml-1">{t.gpsAccuracyWarning}</p>
+
+                {audioEnabled && (
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium text-gray-900">{t.cooldownLabel}</span>
+                        <p className="text-xs text-gray-500 mt-0.5">{t.cooldownHint}</p>
+                      </div>
+                      <select
+                        value={narrationCooldown}
+                        onChange={(e) => setNarrationCooldown(Number(e.target.value))}
+                        className="bg-gray-100 text-gray-800 rounded-lg px-3 py-2 text-sm border-none focus:ring-2 focus:ring-orange-500"
+                      >
+                        <option value={5}>{t.cooldown5min}</option>
+                        <option value={10}>{t.cooldown10min}</option>
+                        <option value={20}>{t.cooldown20min}</option>
+                        <option value={30}>{t.cooldown30min}</option>
+                        <option value={60}>{t.cooldown1hr}</option>
+                        <option value={0}>{t.cooldownNever}</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 {/* Text Size Slider */}
                 <div className="space-y-4">

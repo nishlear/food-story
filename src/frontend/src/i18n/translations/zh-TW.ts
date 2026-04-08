@@ -192,4 +192,20 @@ export const zhTW: Translations = {
 
   // Language Picker
   languageLabel: '語言',
+
+  // TTS Settings
+  cooldownLabel: '自動講解冷卻時間',
+  cooldownHint: '重新講解同一商家前的等待時間',
+  cooldown5min: '5分鐘',
+  cooldown10min: '10分鐘',
+  cooldown20min: '20分鐘',
+  cooldown30min: '30分鐘',
+  cooldown1hr: '1小時',
+  cooldownNever: '不自動觸發',
+  gpsAccuracyWarning: '若GPS精度不足，此功能可能無法正常運作',
+  gpsLowAccuracyTitle: 'GPS精度偏低',
+  gpsLowAccuracyMessage: 'GPS精度偏低，自動講解可能無法正常運作。是否要停用此功能？',
+  disable: '停用',
+  keepEnabled: '保持啟用',
+  transitionPhrase: '您剛剛離開了{from}，現在為您介紹{to}',
 };

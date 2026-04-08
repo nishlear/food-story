@@ -25,6 +25,7 @@ services:
       - "8000:8000"
     volumes:
       - maps_data:/static/maps
+      - audio_data:/static/audio
     depends_on:
       db:
         condition: service_healthy
@@ -43,3 +44,4 @@ services:
 volumes:
   postgres_data:
   maps_data:
+  audio_data:

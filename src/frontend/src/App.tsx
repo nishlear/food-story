@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { CurrentUser, Vendor } from './types';
 import { useLanguage } from './i18n/context';
+import { useTTS } from './hooks/useTTS';
 import LoginScreen from './components/LoginScreen';
 import LocationSelection from './components/LocationSelection';
 import MapInterface from './components/MapInterface';
@@ -39,8 +40,16 @@ export default function App() {
   const [pinPlacementVendor, setPinPlacementVendor] = useState<Vendor | null>(null);
   const [candidatePin, setCandidatePin] = useState<{ lat: number; lon: number } | null>(null);
 
-  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [audioEnabled, setAudioEnabled] = useState(() => {
+    return localStorage.getItem('food-story-audio') === 'true';
+  });
+  const [narrationCooldown, setNarrationCooldown] = useState<number>(() => {
+    const stored = localStorage.getItem('food-story-cooldown');
+    return stored ? Number(stored) : 60;
+  });
   const [textSize, setTextSize] = useState(16);
+  const [showGpsWarning, setShowGpsWarning] = useState(false);
+  const tts = useTTS();
 
   const authHeaders = () => ({
     'Content-Type': 'application/json',
@@ -55,6 +64,14 @@ export default function App() {
         .catch(err => console.error('Failed to fetch streets:', err));
     }
   }, [currentScreen]);
+
+  useEffect(() => {
+    localStorage.setItem('food-story-audio', String(audioEnabled));
+  }, [audioEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('food-story-cooldown', String(narrationCooldown));
+  }, [narrationCooldown]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -259,6 +276,10 @@ export default function App() {
             onConfirmPin={handleConfirmPin}
             onCancelPin={handleCancelPin}
             pinPlacementVendorName={pinPlacementVendor?.name}
+            audioEnabled={audioEnabled}
+            narrationCooldown={narrationCooldown}
+            tts={tts}
+            onGpsAccuracyWarning={() => setShowGpsWarning(true)}
           />
         )}
         {currentScreen === 'admin' && (
@@ -306,6 +327,8 @@ export default function App() {
         onClose={() => setIsSettingsOpen(false)}
         audioEnabled={audioEnabled}
         setAudioEnabled={setAudioEnabled}
+        narrationCooldown={narrationCooldown}
+        setNarrationCooldown={setNarrationCooldown}
         textSize={textSize}
         setTextSize={setTextSize}
         currentUser={currentUser}
@@ -325,7 +348,32 @@ export default function App() {
                    selectedLocation?.lon_se != null)}
         onSetPinLocation={handleSetPinLocation}
         onVendorUpdated={handleVendorUpdated}
+        tts={tts}
       />
+
+      {/* GPS Low Accuracy Warning */}
+      {showGpsWarning && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{t.gpsLowAccuracyTitle}</h3>
+            <p className="text-gray-600 mb-4">{t.gpsLowAccuracyMessage}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setAudioEnabled(false); setShowGpsWarning(false); }}
+                className="flex-1 bg-red-500 text-white py-2.5 rounded-xl font-semibold"
+              >
+                {t.disable}
+              </button>
+              <button
+                onClick={() => setShowGpsWarning(false)}
+                className="flex-1 bg-gray-100 text-gray-800 py-2.5 rounded-xl font-semibold"
+              >
+                {t.keepEnabled}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       <AnimatePresence>
