@@ -5,6 +5,7 @@ export type GeoStatus = 'idle' | 'pending' | 'granted' | 'denied' | 'unavailable
 export interface GeoPosition {
   lat: number;
   lon: number;
+  accuracy: number; // meters
 }
 
 export function useGeolocation(): {
@@ -24,7 +25,7 @@ export function useGeolocation(): {
     setStatus('pending');
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
-        setPosition({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        setPosition({ lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy });
         setStatus('granted');
       },
       (err) => {

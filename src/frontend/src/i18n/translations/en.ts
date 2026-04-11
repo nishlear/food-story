@@ -192,4 +192,22 @@ export const en: Translations = {
 
   // Language Picker
   languageLabel: 'Language',
+
+  // TTS Settings
+  cooldownLabel: 'Auto-narration cooldown',
+  cooldownHint: 'Time before re-narrating the same vendor',
+  cooldown5min: '5 minutes',
+  cooldown10min: '10 minutes',
+  cooldown20min: '20 minutes',
+  cooldown30min: '30 minutes',
+  cooldown1hr: '1 hour',
+  cooldownNever: 'Never auto-trigger',
+  gpsAccuracyWarning: 'If GPS is not accurate enough, this feature might not work',
+  gpsLowAccuracyTitle: 'Low GPS Accuracy',
+  gpsLowAccuracyMessage: 'GPS accuracy is low. Auto-narration may not work correctly. Would you like to disable it?',
+  disable: 'Disable',
+  keepEnabled: 'Keep Enabled',
+  transitionPhrase: 'You just left {from}, now introducing {to}',
+  ttsSpeedLabel: 'Narration speed',
+  ttsSpeedHint: 'How fast the voice reads vendor descriptions',
 };

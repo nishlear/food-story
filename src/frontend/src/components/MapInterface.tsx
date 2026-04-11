@@ -7,6 +7,9 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { projectVendorToPercent, percentToLatLon } from '../utils/geoProjection';
 import { CurrentUser } from '../types';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { UseTTSReturn } from '../hooks/useTTS';
+import { useProximityNarration } from '../hooks/useProximityNarration';
+import { Language } from '../i18n/types';
 
 interface Props {
   location: any;
@@ -26,10 +29,16 @@ interface Props {
   onConfirmPin?: () => void;
   onCancelPin?: () => void;
   pinPlacementVendorName?: string;
+  // TTS / proximity props
+  audioEnabled?: boolean;
+  narrationCooldown?: number;
+  ttsRate?: number;
+  tts?: UseTTSReturn;
+  onGpsAccuracyWarning?: () => void;
 }
 
-export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName }: Props) {
-  const { t } = useLanguage();
+export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName, audioEnabled = false, narrationCooldown = 60, ttsRate = 1.0, tts, onGpsAccuracyWarning }: Props) {
+  const { t, language } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
   const imgContainerRef = useRef<HTMLDivElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -39,6 +48,20 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
   const { position: gpsPosition, status: gpsStatus, request: requestGps } = useGeolocation();
   const [imgNaturalSize, setImgNaturalSize] = useState<{ w: number; h: number } | null>(null);
   const [containerSize, setContainerSize] = useState<{ w: number; h: number } | null>(null);
+
+  // Proximity auto-narration
+  const noopTTS: UseTTSReturn = { isPlaying: false, currentVendorId: null, play: () => {}, stop: () => {} };
+  useProximityNarration({
+    vendors,
+    userPosition: gpsPosition,
+    audioEnabled,
+    cooldownMinutes: narrationCooldown,
+    language: language as Language,
+    ttsRate,
+    tts: tts ?? noopTTS,
+    translations: { transitionPhrase: t.transitionPhrase },
+    onGpsAccuracyWarning,
+  });
 
   // Observe the inner image container — stable full-screen size inside TransformComponent
   useEffect(() => {

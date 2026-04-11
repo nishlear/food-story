@@ -192,4 +192,22 @@ export interface Translations {
 
   // --- Language Picker ---
   languageLabel: string;
+
+  // --- TTS Settings ---
+  cooldownLabel: string;
+  cooldownHint: string;
+  ttsSpeedLabel: string;
+  ttsSpeedHint: string;
+  cooldown5min: string;
+  cooldown10min: string;
+  cooldown20min: string;
+  cooldown30min: string;
+  cooldown1hr: string;
+  cooldownNever: string;
+  gpsAccuracyWarning: string;
+  gpsLowAccuracyTitle: string;
+  gpsLowAccuracyMessage: string;
+  disable: string;
+  keepEnabled: string;
+  transitionPhrase: string;
 }

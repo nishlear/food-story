@@ -192,4 +192,22 @@ export const zhCN: Translations = {
 
   // Language Picker
   languageLabel: '语言',
+
+  // TTS Settings
+  cooldownLabel: '自动讲解冷却时间',
+  cooldownHint: '重新讲解同一商家前的等待时间',
+  cooldown5min: '5分钟',
+  cooldown10min: '10分钟',
+  cooldown20min: '20分钟',
+  cooldown30min: '30分钟',
+  cooldown1hr: '1小时',
+  cooldownNever: '不自动触发',
+  gpsAccuracyWarning: '若GPS精度不足，此功能可能无法正常工作',
+  gpsLowAccuracyTitle: 'GPS精度较低',
+  gpsLowAccuracyMessage: 'GPS精度较低，自动讲解可能无法正常工作。是否要禁用此功能？',
+  disable: '禁用',
+  keepEnabled: '保持开启',
+  transitionPhrase: '您刚刚离开了{from}，现在为您介绍{to}',
+  ttsSpeedLabel: '朗读速度',
+  ttsSpeedHint: '语音朗读描述的速度',
 };

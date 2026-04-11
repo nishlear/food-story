@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Star, Navigation, Share2, X, Edit2 } from 'lucide-react';
+import { MapPin, Star, Navigation, Share2, X, Edit2, Volume2, Square } from 'lucide-react';
 import { CurrentUser, Comment, Vendor } from '../types';
+import { UseTTSReturn } from '../hooks/useTTS';
 import VendorRateForm from './VendorRateForm';
 import VendorCommentsList from './VendorCommentsList';
 import VendorEditModal from './VendorEditModal';
@@ -17,9 +18,11 @@ interface Props {
   hasMap?: boolean;
   onSetPinLocation?: (vendor: Vendor) => void;
   onVendorUpdated?: (vendor: Vendor) => void;
+  tts: UseTTSReturn;
+  ttsRate?: number;
 }
 
-export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated }: Props) {
+export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, tts, ttsRate = 1.0 }: Props) {
   const { t, language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -28,6 +31,7 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
 
   useEffect(() => {
     if (vendor) {
+      tts.stop();
       setIsExpanded(false);
       fetchComments();
     }
@@ -107,6 +111,18 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
                     <Edit2 className="w-4 h-4" />
                   </button>
                 )}
+                <button
+                  onClick={() =>
+                    tts.isPlaying && tts.currentVendorId === vendor.id
+                      ? tts.stop()
+                      : tts.play(description || vendor.name, language, vendor.id, ttsRate)
+                  }
+                  className="p-2 bg-orange-100 text-orange-600 rounded-full hover:bg-orange-200 transition-colors"
+                >
+                  {tts.isPlaying && tts.currentVendorId === vendor.id
+                    ? <Square className="w-4 h-4 fill-current" />
+                    : <Volume2 className="w-4 h-4" />}
+                </button>
                 <button onClick={onClose} className="p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200">
                   <X className="w-5 h-5" />
                 </button>

@@ -192,4 +192,22 @@ export const ko: Translations = {
 
   // Language Picker
   languageLabel: '언어',
+
+  // TTS Settings
+  cooldownLabel: '자동 내레이션 대기 시간',
+  cooldownHint: '같은 가게를 다시 내레이션하기 전 대기 시간',
+  cooldown5min: '5분',
+  cooldown10min: '10분',
+  cooldown20min: '20분',
+  cooldown30min: '30분',
+  cooldown1hr: '1시간',
+  cooldownNever: '자동 실행 안 함',
+  gpsAccuracyWarning: 'GPS 정확도가 낮으면 이 기능이 작동하지 않을 수 있습니다',
+  gpsLowAccuracyTitle: 'GPS 정확도 낮음',
+  gpsLowAccuracyMessage: 'GPS 정확도가 낮습니다. 자동 내레이션이 제대로 작동하지 않을 수 있습니다. 비활성화하시겠습니까?',
+  disable: '비활성화',
+  keepEnabled: '계속 사용',
+  transitionPhrase: '{from}을(를) 떠나 {to}을(를) 소개합니다',
+  ttsSpeedLabel: '내레이션 속도',
+  ttsSpeedHint: '음성이 설명을 읽는 속도',
 };

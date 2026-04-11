@@ -304,3 +304,138 @@ sequenceDiagram
         CPM-->>U: Show error
     end
 ```
+
+## 12. Language Selection
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant SM as SettingsModal
+    participant LP as LanguagePicker
+    participant App as App.tsx
+    participant I18N as i18n Context
+
+    U->>SM: Open Settings
+    SM-->>LP: Render LanguagePicker (current language)
+    U->>LP: Select a language (e.g. "日本語")
+    LP->>App: onLanguageChange(language)
+    App->>I18N: setLanguage(language)
+    I18N-->>App: Re-render all components with new translations
+    App-->>U: All UI text and vendor descriptions switch to selected language
+```
+
+## 13. Vendor Description Auto-Translation
+
+```mermaid
+sequenceDiagram
+    actor FV as Foodvendor/Admin
+    participant AVM as AddVendorModal
+    participant API as Backend API
+    participant GPT as GPT-4o-mini
+
+    FV->>AVM: Fill vendor name & description (in Vietnamese)
+    FV->>AVM: Click "Submit"
+    AVM->>API: POST /api/streets/:streetId/vendors\n{name, description, description_language:"vi", ...}\nX-Role-Token: <token>
+    API->>GPT: Translate Vietnamese description → {en, ko, ja, zh-CN, zh-TW, es}
+    GPT-->>API: {en: "...", ko: "...", ja: "...", ...}
+    API->>API: Store description_translations as JSON in vendor record
+    API->>API: Background: generate Edge TTS .mp3 for each language
+    API-->>AVM: 201 Created
+    AVM-->>FV: "Vendor added successfully"
+```
+
+## 14. Manual TTS Playback (Vendor Detail)
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant VBS as VendorBottomSheet
+    participant TTS as useTTS hook
+    participant Audio as /audio/{id}_{lang}.mp3
+    participant WSA as Web Speech API
+
+    U->>VBS: Tap speaker button on vendor card
+    VBS->>TTS: play(description, language, vendorId, ttsRate)
+    TTS->>Audio: GET /audio/{vendorId}_{language}.mp3
+    alt pre-generated file exists
+        Audio-->>TTS: MP3 audio stream
+        TTS-->>U: Play Edge TTS voice at selected speed
+    else file not found
+        TTS->>WSA: SpeechSynthesisUtterance(description, language)
+        WSA-->>U: Play browser TTS voice
+    end
+    U->>VBS: Tap speaker button again
+    VBS->>TTS: stop()
+    TTS-->>U: Playback stops
+```
+
+## 15. Proximity-based Auto-narration
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant MI as MapInterface
+    participant GEO as useGeolocation hook
+    participant PN as useProximityNarration hook
+    participant TTS as useTTS hook
+
+    MI->>GEO: Watch user GPS position
+    GEO-->>MI: userPosition {lat, lon, accuracy}
+
+    loop every second
+        PN->>PN: Calculate haversine distance to each vendor
+        alt user within ~30m of a vendor AND cooldown elapsed
+            PN->>TTS: play(vendorDescription, language, vendorId, ttsRate)
+            TTS-->>U: Auto-play vendor description audio
+            PN->>PN: Record cooldown timestamp for vendor
+        end
+    end
+
+    note over PN: Requires audioEnabled=true\nand GPS position available
+```
+
+## 16. TTS Settings Configuration
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant SM as SettingsModal
+    participant App as App.tsx
+
+    U->>SM: Open Settings
+    U->>SM: Toggle "Audio narration" switch
+    SM->>App: setAudioEnabled(true/false)
+
+    alt audioEnabled = true
+        U->>SM: Select cooldown duration (e.g. 10 min)
+        SM->>App: setCooldownMinutes(10)
+        U->>SM: Adjust TTS speed slider (e.g. 1.5×)
+        SM->>App: setTtsRate(1.5)
+        App-->>U: Proximity narration active with new settings
+    else audioEnabled = false
+        App-->>U: Auto-narration disabled
+    end
+```
+
+## 17. GPS User Location Display
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant MI as MapInterface
+    participant GEO as useGeolocation hook
+    participant Browser as Browser Geolocation API
+
+    MI->>Browser: navigator.geolocation.watchPosition()
+    Browser-->>GEO: {lat, lon, accuracy}
+    GEO-->>MI: userPosition
+
+    alt street has bbox + map image
+        MI->>MI: projectVendorToPercent(userPosition, bbox) → {x%, y%}
+        MI-->>U: Show blue dot at user's position on map
+    end
+
+    alt GPS accuracy > 50m
+        MI-->>U: Show GPS accuracy warning toast
+    end
+```
