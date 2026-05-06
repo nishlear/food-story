@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { X } from 'lucide-react';
 import { CurrentUser } from '../types';
 import RegisterForm from './RegisterForm';
 import { useLanguage } from '../i18n/context';
 
 interface Props {
   onLogin: (user: CurrentUser) => void;
+  onClose: () => void;
+  onSkip: () => void;
 }
 
-export default function LoginScreen({ onLogin }: Props) {
+export default function LoginScreen({ onLogin, onClose, onSkip }: Props) {
   const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -44,19 +47,26 @@ export default function LoginScreen({ onLogin }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600"
+      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.1 }}
-        className="w-full max-w-sm mx-6 bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden"
       >
-        <div className="px-8 pt-10 pb-6 text-center">
+        <div className="relative px-8 pt-10 pb-6 text-center">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
           <div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/30">
             <span className="text-3xl">🍜</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Food Story</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.loginTitle}</h1>
           <p className="text-gray-500 text-sm mt-1">
             {showRegister ? t.createAccountSubtitle : t.signInSubtitle}
           </p>
@@ -108,6 +118,20 @@ export default function LoginScreen({ onLogin }: Props) {
               className="w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors py-1"
             >
               {t.noAccount}
+            </button>
+
+            <div className="relative flex items-center gap-3 py-2">
+              <div className="flex-1 border-t border-gray-200" />
+              <span className="text-xs text-gray-400">{t.orContinueAsGuest}</span>
+              <div className="flex-1 border-t border-gray-200" />
+            </div>
+
+            <button
+              type="button"
+              onClick={onSkip}
+              className="w-full text-center text-sm font-medium text-orange-500 hover:text-orange-600 transition-colors py-2"
+            >
+              {t.orContinueAsGuest}
             </button>
           </form>
         )}

@@ -18,6 +18,12 @@ export const zhTW: Translations = {
   createAccount: '建立帳號',
   alreadyHaveAccount: '已有帳號？去登入',
   passwordMismatch: '密碼不一致',
+  login: '登入',
+  loginToContinue: '登入以繼續',
+  loginToRate: '登入後發表評價',
+  loginToAddVendor: '登入後新增商家',
+  loginTitle: '登入 Food Story',
+  orContinueAsGuest: '以訪客身分繼續',
 
   // Location Selection
   whereAreYou: '您在哪裡？',

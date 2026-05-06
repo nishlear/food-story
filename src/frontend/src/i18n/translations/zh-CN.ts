@@ -18,6 +18,12 @@ export const zhCN: Translations = {
   createAccount: '创建账户',
   alreadyHaveAccount: '已有账户？去登录',
   passwordMismatch: '密码不一致',
+  login: '登录',
+  loginToContinue: '登录以继续',
+  loginToRate: '登录后发表评价',
+  loginToAddVendor: '登录后添加商家',
+  loginTitle: '登录 Food Story',
+  orContinueAsGuest: '以游客身份继续',
 
   // Location Selection
   whereAreYou: '您在哪里？',

@@ -18,6 +18,12 @@ export const ja: Translations = {
   createAccount: 'アカウント作成',
   alreadyHaveAccount: 'アカウントをお持ちの方はログイン',
   passwordMismatch: 'パスワードが一致しません',
+  login: 'ログイン',
+  loginToContinue: '続行するにはログイン',
+  loginToRate: 'ログインしてレビューを書く',
+  loginToAddVendor: 'ログインして店舗を追加',
+  loginTitle: 'Food Story にログイン',
+  orContinueAsGuest: 'ゲストとして続ける',
 
   // Location Selection
   whereAreYou: 'どこにいますか？',

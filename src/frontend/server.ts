@@ -349,9 +349,8 @@ app.put('/api/auth/change-password', (req, res) => {
 
 // --- Streets Endpoints ---
 
-// GET /api/streets — require any authenticated user
+// GET /api/streets — public (optional auth)
 app.get('/api/streets', (req, res) => {
-  if (!getRoleFromRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
   const streets = db.prepare('SELECT * FROM streets').all();
   const streetsWithCounts = streets.map((s: any) => {
     const countObj = db.prepare('SELECT COUNT(*) as count FROM vendors WHERE street_id = ?').get(s.id) as { count: number };
@@ -409,9 +408,8 @@ app.delete('/api/streets/:id', (req, res) => {
   res.json({ success: true });
 });
 
-// GET /api/streets/:id/vendors — require any authenticated user
+// GET /api/streets/:id/vendors — public (optional auth)
 app.get('/api/streets/:id/vendors', (req, res) => {
-  if (!getRoleFromRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
   const vendors = db.prepare('SELECT * FROM vendors WHERE street_id = ?').all(req.params.id);
   const parsedVendors = vendors.map((v: any) => normalizeVendorRecord(v));
   res.json(parsedVendors);
@@ -470,6 +468,13 @@ app.put('/api/streets/:streetId/vendors/:vendorId', async (req, res) => {
   return res.status(403).json({ error: 'Forbidden' });
 });
 
+// DELETE /api/streets/:streetId/vendors/:vendorId — admin only
+app.delete('/api/streets/:streetId/vendors/:vendorId', (req, res) => {
+  if (getRoleFromRequest(req) !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+  db.prepare('DELETE FROM vendors WHERE id = ? AND street_id = ?').run(req.params.vendorId, req.params.streetId);
+  res.json({ success: true });
+});
+
 // GET /api/vendors/mine — foodvendor only
 app.get('/api/vendors/mine', (req, res) => {
   const authUser = getUserFromRequest(req);
@@ -488,9 +493,8 @@ function recalcVendorRating(vendorId: string) {
   db.prepare('UPDATE vendors SET rating = ?, reviews = ? WHERE id = ?').run(avg, result.count, vendorId);
 }
 
-// GET /api/vendors/:vendorId/comments — any auth
+// GET /api/vendors/:vendorId/comments — public (optional auth)
 app.get('/api/vendors/:vendorId/comments', (req, res) => {
-  if (!getRoleFromRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
   const comments = db.prepare('SELECT * FROM comments WHERE vendor_id = ? ORDER BY created_at DESC').all(req.params.vendorId);
   res.json(comments);
 });

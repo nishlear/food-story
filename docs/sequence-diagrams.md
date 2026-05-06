@@ -417,7 +417,61 @@ sequenceDiagram
     end
 ```
 
-## 17. GPS User Location Display
+## 18. Optional Auth — Guest Browse
+
+```mermaid
+sequenceDiagram
+    actor G as Guest
+    participant App as App.tsx
+    participant API as Backend API
+
+    G->>App: Opens app
+    App->>API: GET /api/streets (no token)
+    API-->>App: 200 [streets]
+    App-->>G: Show street list
+
+    G->>App: Select a street
+    App->>API: GET /api/streets/{id}/vendors (no token)
+    API-->>App: 200 [vendors]
+    App-->>G: Show map with vendor pins
+
+    G->>App: Tap vendor pin
+    App->>API: GET /api/vendors/{id}/comments (no token)
+    API-->>App: 200 [comments]
+    App-->>G: Show vendor bottom sheet
+    Note over App,G: Rate form replaced with "Login to rate" CTA
+
+    G->>App: Tap "Login to rate"
+    App->>App: Open login modal
+```
+
+## 19. Optional Auth — Login from Guest (Return Context)
+
+```mermaid
+sequenceDiagram
+    actor G as Guest
+    participant App as App.tsx
+    participant Modal as LoginModal
+    participant API as Backend API
+
+    G->>App: Tap "Login to rate" on vendor #5
+    App->>App: setLoginCallback({screen:'map', streetId:'3'})
+    App-->>G: Show login modal
+    G->>Modal: Enter credentials
+    Modal->>API: POST /api/auth/login
+    API-->>Modal: {username, role, token}
+    Modal->>App: onLogin(user)
+    App->>App: setCurrentUser(user), close modal
+    Note over App: Consume loginCallback
+    App->>API: GET /api/streets/{id} (with token)
+    API-->>App: street data
+    App->>App: restore map screen
+    App->>API: GET /api/streets/{id}/vendors (with token)
+    API-->>App: [vendors]
+    App-->>G: Show map screen (vendor bottom sheet now shows rate form)
+```
+
+## 20. GPS User Location Display
 
 ```mermaid
 sequenceDiagram

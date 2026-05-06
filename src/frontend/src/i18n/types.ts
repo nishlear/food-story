@@ -18,6 +18,12 @@ export interface Translations {
   createAccount: string;
   alreadyHaveAccount: string;
   passwordMismatch: string;
+  login: string;
+  loginToContinue: string;
+  loginToRate: string;
+  loginToAddVendor: string;
+  loginTitle: string;
+  orContinueAsGuest: string;
 
   // --- Location Selection ---
   whereAreYou: string;

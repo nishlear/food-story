@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, ChevronLeft, Settings, Plus, Minus, LocateFixed, LocateOff, Loader } from 'lucide-react';
+import { MapPin, ChevronLeft, Settings, Plus, Minus, LocateFixed, LocateOff, Loader, LogIn } from 'lucide-react';
 import LanguagePicker from './LanguagePicker';
 import { useLanguage, interpolate } from '../i18n/context';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
@@ -29,6 +29,7 @@ interface Props {
   onConfirmPin?: () => void;
   onCancelPin?: () => void;
   pinPlacementVendorName?: string;
+  onLoginRequest?: () => void;
   // TTS / proximity props
   audioEnabled?: boolean;
   narrationCooldown?: number;
@@ -37,7 +38,7 @@ interface Props {
   onGpsAccuracyWarning?: () => void;
 }
 
-export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName, audioEnabled = false, narrationCooldown = 60, ttsRate = 1.0, tts, onGpsAccuracyWarning }: Props) {
+export default function MapInterface({ location, vendors, onBack, onOpenSettings, onSelectVendor, selectedVendor, isAddingVendor, onAddVendorClick, onMapClick, currentUser, pinPlacementMode = false, onPinPlacementTap, candidatePin = null, onConfirmPin, onCancelPin, pinPlacementVendorName, onLoginRequest, audioEnabled = false, narrationCooldown = 60, ttsRate = 1.0, tts, onGpsAccuracyWarning }: Props) {
   const { t, language } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
   const imgContainerRef = useRef<HTMLDivElement>(null);
@@ -335,13 +336,21 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
                     <Settings className="w-6 h-6" />
                   </button>
                   <LanguagePicker />
-                  {canAddVendor && (
+                  {canAddVendor ? (
                     <button
                       onClick={onAddVendorClick}
                       aria-label="Add vendor"
                       className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors ${isAddingVendor ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                     >
                       <Plus className="w-6 h-6" />
+                    </button>
+                  ) : !currentUser && onLoginRequest && (
+                    <button
+                      onClick={onLoginRequest}
+                      aria-label="Login"
+                      className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                      <LogIn className="w-5 h-5" />
                     </button>
                   )}
                 </div>
@@ -432,12 +441,19 @@ export default function MapInterface({ location, vendors, onBack, onOpenSettings
               <Settings className="w-6 h-6" />
             </button>
             <LanguagePicker />
-            {canAddVendor && (
+            {canAddVendor ? (
               <button
                 onClick={onAddVendorClick}
                 className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors ${isAddingVendor ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
               >
                 <Plus className="w-6 h-6" />
+              </button>
+            ) : !currentUser && onLoginRequest && (
+              <button
+                onClick={onLoginRequest}
+                className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                <LogIn className="w-5 h-5" />
               </button>
             )}
           </div>

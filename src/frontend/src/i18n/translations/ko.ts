@@ -18,6 +18,12 @@ export const ko: Translations = {
   createAccount: '계정 만들기',
   alreadyHaveAccount: '이미 계정이 있으신가요? 로그인',
   passwordMismatch: '비밀번호가 일치하지 않습니다',
+  login: '로그인',
+  loginToContinue: '계속하려면 로그인',
+  loginToRate: '로그인하여 리뷰 작성',
+  loginToAddVendor: '로그인하여 가게 추가',
+  loginTitle: 'Food Story 로그인',
+  orContinueAsGuest: '게스트로 계속',
 
   // Location Selection
   whereAreYou: '어디 계세요?',

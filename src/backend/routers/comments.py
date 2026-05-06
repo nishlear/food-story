@@ -1,11 +1,11 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth import require_admin, require_authenticated
+from auth import get_optional_user, require_admin, require_authenticated
 from database import get_db
 from models import FoodComment, FoodVendor
 from schemas import CommentCreate, CommentResponse
@@ -17,7 +17,7 @@ router = APIRouter()
 @router.get("/vendors/{vendor_id}/comments", response_model=List[CommentResponse])
 def list_comments(
     vendor_id: str,
-    current_user: dict = Depends(require_authenticated),
+    current_user: Optional[dict] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     comments = (

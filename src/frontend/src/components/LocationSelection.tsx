@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Plus, Edit2, Trash2, LogOut, ShieldCheck } from 'lucide-react';
+import { Plus, Edit2, Trash2, LogOut, LogIn, ShieldCheck } from 'lucide-react';
 import { CurrentUser } from '../types';
 import { useLanguage, interpolate, plural } from '../i18n/context';
 
@@ -13,6 +13,7 @@ interface Props {
   currentUser: CurrentUser | null;
   onLogout: () => void;
   onGoToAdmin: () => void;
+  onLoginRequest: () => void;
 }
 
 const roleBadgeStyle: Record<string, string> = {
@@ -21,7 +22,7 @@ const roleBadgeStyle: Record<string, string> = {
   user: 'bg-green-100 text-green-700',
 };
 
-export default function LocationSelection({ locations, onSelect, onAddClick, onEditClick, onDeleteClick, currentUser, onLogout, onGoToAdmin }: Props) {
+export default function LocationSelection({ locations, onSelect, onAddClick, onEditClick, onDeleteClick, currentUser, onLogout, onGoToAdmin, onLoginRequest }: Props) {
   const { t } = useLanguage();
   const isAdmin = currentUser?.role === 'admin';
 
@@ -66,13 +67,23 @@ export default function LocationSelection({ locations, onSelect, onAddClick, onE
               </button>
             </>
           )}
-          <button
-            onClick={onLogout}
-            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-            title={t.logout}
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          {currentUser ? (
+            <button
+              onClick={onLogout}
+              className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+              title={t.logout}
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          ) : (
+            <button
+              onClick={onLoginRequest}
+              className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+              title={t.login}
+            >
+              <LogIn className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 

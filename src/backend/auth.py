@@ -22,6 +22,12 @@ def get_role_from_token(token: str) -> Optional[str]:
     return user["role"] if user else None
 
 
+def get_optional_user(x_role_token: Optional[str] = Header(default=None)) -> Optional[dict]:
+    if not x_role_token:
+        return None
+    return get_user_from_token(x_role_token)
+
+
 def require_authenticated(x_role_token: Optional[str] = Header(default=None)) -> dict:
     if not x_role_token:
         raise HTTPException(status_code=401, detail="Unauthorized")

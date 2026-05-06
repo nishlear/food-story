@@ -1,13 +1,13 @@
 import json
 import os
 import uuid
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from audio import EDGE_TTS_VOICES, _audio_dir, generate_vendor_audio
-from auth import require_admin, require_authenticated, require_vendor_or_admin
+from auth import get_optional_user, require_admin, require_authenticated, require_vendor_or_admin
 from database import get_db
 from models import FoodStreet, FoodVendor
 from schemas import FoodVendorBase, FoodVendorCreate, FoodVendorResponse
@@ -24,7 +24,7 @@ router = APIRouter()
 @router.get("/streets/{street_id}/vendors", response_model=List[FoodVendorResponse])
 def list_vendors(
     street_id: str,
-    current_user: dict = Depends(require_authenticated),
+    current_user: Optional[dict] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     if not db.query(FoodStreet).filter(FoodStreet.id == street_id).first():
@@ -69,7 +69,7 @@ def add_vendor(
 def get_vendor(
     street_id: str,
     vendor_id: str,
-    current_user: dict = Depends(require_authenticated),
+    current_user: Optional[dict] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     v = (

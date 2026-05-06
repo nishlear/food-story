@@ -18,6 +18,12 @@ export const vi: Translations = {
   createAccount: 'Tạo tài khoản',
   alreadyHaveAccount: 'Đã có tài khoản? Đăng nhập',
   passwordMismatch: 'Mật khẩu không khớp',
+  login: 'Đăng nhập',
+  loginToContinue: 'Đăng nhập để tiếp tục',
+  loginToRate: 'Đăng nhập để viết đánh giá',
+  loginToAddVendor: 'Đăng nhập để thêm quán',
+  loginTitle: 'Đăng nhập Food Story',
+  orContinueAsGuest: 'Tiếp tục với tư cách khách',
 
   // Location Selection
   whereAreYou: 'Bạn đang ở đâu?',

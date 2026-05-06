@@ -18,11 +18,12 @@ interface Props {
   hasMap?: boolean;
   onSetPinLocation?: (vendor: Vendor) => void;
   onVendorUpdated?: (vendor: Vendor) => void;
+  onLoginRequest?: () => void;
   tts: UseTTSReturn;
   ttsRate?: number;
 }
 
-export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, tts, ttsRate = 1.0 }: Props) {
+export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, onLoginRequest, tts, ttsRate = 1.0 }: Props) {
   const { t, language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -172,13 +173,22 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               </div>
 
               {/* Rate Form */}
-              {currentUser && (
+              {currentUser ? (
                 <div className="py-4 border-t border-gray-100">
                   <VendorRateForm
                     vendorId={vendor.id}
                     authHeaders={authHeaders}
                     onSubmitted={fetchComments}
                   />
+                </div>
+              ) : onLoginRequest && (
+                <div className="py-4 border-t border-gray-100">
+                  <button
+                    onClick={onLoginRequest}
+                    className="w-full bg-orange-50 border border-orange-200 p-4 rounded-2xl text-center hover:bg-orange-100 transition-colors"
+                  >
+                    <p className="font-semibold text-orange-600 text-sm">{t.loginToRate}</p>
+                  </button>
                 </div>
               )}
 

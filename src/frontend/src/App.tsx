@@ -20,7 +20,7 @@ type Screen = 'login' | 'location' | 'map' | 'admin';
 export default function App() {
   const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('login');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('location');
 
   const [locations, setLocations] = useState<any[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -55,6 +55,13 @@ export default function App() {
   const [showGpsWarning, setShowGpsWarning] = useState(false);
   const tts = useTTS();
 
+  // Login modal state
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [loginCallback, setLoginCallback] = useState<{
+    screen: Screen;
+    streetId?: string;
+  } | null>(null);
+
   const authHeaders = () => ({
     'Content-Type': 'application/json',
     ...(currentUser ? { 'X-Role-Token': currentUser.token } : {}),
@@ -88,12 +95,42 @@ export default function App() {
 
   const handleLogin = (user: CurrentUser) => {
     setCurrentUser(user);
+    setIsLoginOpen(false);
+    if (loginCallback) {
+      const { screen: targetScreen, streetId } = loginCallback;
+      setLoginCallback(null);
+      if (targetScreen === 'map' && streetId) {
+        fetch(`/api/streets/${streetId}`, { headers: authHeaders() })
+          .then(res => res.json())
+          .then(loc => {
+            setSelectedLocation(loc);
+            setCurrentScreen('map');
+            return fetch(`/api/streets/${streetId}/vendors`, { headers: authHeaders() });
+          })
+          .then(res => res.json())
+          .then(data => {
+            setVendors(data);
+          })
+          .catch(err => console.error('Failed to restore map context:', err));
+        return;
+      }
+    }
     setCurrentScreen('location');
+  };
+
+  const handleLoginRequest = (context?: { screen: Screen; streetId?: string }) => {
+    if (context) setLoginCallback(context);
+    setIsLoginOpen(true);
+  };
+
+  const handleGuestContinue = () => {
+    setIsLoginOpen(false);
+    setLoginCallback(null);
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
-    setCurrentScreen('login');
+    setCurrentScreen('location');
     setSelectedLocation(null);
     setVendors([]);
   };
@@ -168,7 +205,7 @@ export default function App() {
   };
 
   const handleSetPinLocation = (vendor: Vendor) => {
-    setSelectedVendor(null);           // close bottom sheet
+    setSelectedVendor(null);
     setPinPlacementVendor(vendor);
     setPinPlacementMode(true);
     showToast(t.tapMapToPlacePin);
@@ -207,7 +244,6 @@ export default function App() {
 
   const handleCancelPin = () => {
     setCandidatePin(null);
-    // Keep pinPlacementMode=true so admin can re-tap
   };
 
   const handleAddVendor = async (newVendor: any) => {
@@ -246,9 +282,6 @@ export default function App() {
       style={{ fontSize: `${textSize}px` }}
     >
       <AnimatePresence mode="wait">
-        {currentScreen === 'login' && (
-          <LoginScreen onLogin={handleLogin} />
-        )}
         {currentScreen === 'location' && (
           <LocationSelection
             locations={locations}
@@ -259,6 +292,7 @@ export default function App() {
             currentUser={currentUser}
             onLogout={handleLogout}
             onGoToAdmin={() => setCurrentScreen('admin')}
+            onLoginRequest={() => handleLoginRequest({ screen: 'location' })}
           />
         )}
         {currentScreen === 'map' && (
@@ -289,6 +323,7 @@ export default function App() {
             ttsRate={ttsRate}
             tts={tts}
             onGpsAccuracyWarning={() => setShowGpsWarning(true)}
+            onLoginRequest={() => handleLoginRequest({ screen: 'map', streetId: selectedLocation?.id })}
           />
         )}
         {currentScreen === 'admin' && (
@@ -296,6 +331,17 @@ export default function App() {
             currentUser={currentUser}
             onBack={() => setCurrentScreen('location')}
             authHeaders={authHeaders}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Login Modal */}
+      <AnimatePresence>
+        {isLoginOpen && (
+          <LoginScreen
+            onLogin={handleLogin}
+            onClose={handleGuestContinue}
+            onSkip={handleGuestContinue}
           />
         )}
       </AnimatePresence>
@@ -361,6 +407,10 @@ export default function App() {
         onVendorUpdated={handleVendorUpdated}
         tts={tts}
         ttsRate={ttsRate}
+        onLoginRequest={() => handleLoginRequest({
+          screen: 'map',
+          streetId: selectedLocation?.id,
+        })}
       />
 
       {/* GPS Low Accuracy Warning */}

@@ -1,12 +1,12 @@
 import os
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth import require_admin, require_authenticated
+from auth import get_optional_user, require_admin, require_authenticated
 from config import MAPS_DIR
 from database import get_db
 from map_utils import generate_map_png
@@ -54,7 +54,7 @@ def _try_generate_map(db_street: FoodStreet, db: Session):
 
 @router.get("/streets", response_model=List[FoodStreetResponse])
 def list_streets(
-    current_user: dict = Depends(require_authenticated),
+    current_user: Optional[dict] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     streets = db.query(FoodStreet).all()
@@ -93,7 +93,7 @@ def create_street(
 @router.get("/streets/{street_id}", response_model=FoodStreetResponse)
 def get_street(
     street_id: str,
-    current_user: dict = Depends(require_authenticated),
+    current_user: dict = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     db_street = db.query(FoodStreet).filter(FoodStreet.id == street_id).first()

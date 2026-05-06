@@ -18,6 +18,12 @@ export const en: Translations = {
   createAccount: 'Create Account',
   alreadyHaveAccount: 'Already have an account? Sign in',
   passwordMismatch: 'Passwords do not match',
+  login: 'Login',
+  loginToContinue: 'Log in to continue',
+  loginToRate: 'Log in to leave a review',
+  loginToAddVendor: 'Log in to add vendors',
+  loginTitle: 'Sign in to Food Story',
+  orContinueAsGuest: 'Continue as Guest',
 
   // Location Selection
   whereAreYou: 'Where are you?',
