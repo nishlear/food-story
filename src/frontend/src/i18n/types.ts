@@ -194,7 +194,24 @@ export interface Translations {
   vendorAdded: string;
   vendorUpdated: string;
   failedAddVendor: string;
-  linkCopied: string;
+  showFoodMenu: string;
+  foodMenu: string;
+  price: string;
+  noMenuItems: string;
+  noMenuItemsDesc: string;
+  menuLoadError: string;
+  tryAgain: string;
+  addFood: string;
+  editMenu: string;
+  done: string;
+  deleteMenuItem: string;
+  deleteMenuItemConfirm: string;
+  menuTab: string;
+  itemName: string;
+  itemPrice: string;
+  itemDescription: string;
+  itemImage: string;
+  noMenuItemsTab: string;
 
   // --- Language Picker ---
   languageLabel: string;

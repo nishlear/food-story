@@ -114,3 +114,22 @@ class VendorEditRequest(BaseModel):
     description: Optional[str] = None
     description_language: str = "en"
     images: Optional[List[str]] = []
+
+
+class FoodMenuItemCreate(BaseModel):
+    name: str
+    price: float
+    description: Optional[str] = None
+    image: Optional[str] = None
+
+
+class FoodMenuItemResponse(BaseModel):
+    id: str
+    vendor_id: str
+    name: str
+    price: float
+    description: Optional[str] = None
+    image: Optional[str] = None
+
+    class Config:
+        from_attributes = True

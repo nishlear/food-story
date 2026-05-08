@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Star, Navigation, Share2, X, Edit2, Volume2, Square } from 'lucide-react';
+import { MapPin, Star, UtensilsCrossed, X, Edit2, Volume2, Square } from 'lucide-react';
 import { CurrentUser, Comment, Vendor } from '../types';
 import { UseTTSReturn } from '../hooks/useTTS';
 import VendorRateForm from './VendorRateForm';
 import VendorCommentsList from './VendorCommentsList';
 import VendorEditModal from './VendorEditModal';
+import FoodMenuModal from './FoodMenuModal';
 import { useLanguage } from '../i18n/context';
 import { getDescriptionForLanguage } from '../utils/vendorDescriptions';
 
 interface Props {
   vendor: Vendor | null;
   onClose: () => void;
-  onShare: () => void;
   currentUser: CurrentUser | null;
   authHeaders: () => Record<string, string>;
   hasMap?: boolean;
@@ -23,11 +23,12 @@ interface Props {
   ttsRate?: number;
 }
 
-export default function VendorBottomSheet({ vendor, onClose, onShare, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, onLoginRequest, tts, ttsRate = 1.0 }: Props) {
+export default function VendorBottomSheet({ vendor, onClose, currentUser, authHeaders, hasMap, onSetPinLocation, onVendorUpdated, onLoginRequest, tts, ttsRate = 1.0 }: Props) {
   const { t, language } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -130,18 +131,14 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 px-6 py-4">
-              <button className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
-                <Navigation className="w-5 h-5" />
-                {t.getDirections}
-              </button>
+            {/* Show Food Menu Button */}
+            <div className="px-6 py-4">
               <button
-                onClick={onShare}
-                className="flex-1 bg-gray-100 text-gray-800 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                onClick={() => setIsMenuOpen(true)}
+                className="w-full bg-orange-500 text-white font-semibold py-4 rounded-xl shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
               >
-                <Share2 className="w-5 h-5" />
-                {t.share}
+                <UtensilsCrossed className="w-5 h-5" />
+                {t.showFoodMenu}
               </button>
             </div>
 
@@ -206,6 +203,16 @@ export default function VendorBottomSheet({ vendor, onClose, onShare, currentUse
               <div className="h-20" />
             </div>
           </motion.div>
+
+          {vendor && (
+            <FoodMenuModal
+              vendorId={vendor.id}
+              authHeaders={authHeaders}
+              isOpen={isMenuOpen}
+              onClose={() => setIsMenuOpen(false)}
+              canManage={canEdit}
+            />
+          )}
 
           {canEdit && (
             <VendorEditModal

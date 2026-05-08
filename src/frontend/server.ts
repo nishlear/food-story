@@ -215,6 +215,15 @@ db.exec(`
     created_at TEXT NOT NULL,
     FOREIGN KEY (vendor_id) REFERENCES vendors (id) ON DELETE CASCADE
   );
+  CREATE TABLE IF NOT EXISTS food_menu_items (
+    id TEXT PRIMARY KEY,
+    vendor_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    description TEXT,
+    image TEXT,
+    FOREIGN KEY (vendor_id) REFERENCES vendors (id) ON DELETE CASCADE
+  );
 `);
 
 // Add owner_username column if not exists
@@ -591,6 +600,116 @@ app.get('/api/admin/comments', (req, res) => {
   `).all();
   res.json(comments);
 });
+
+// --- Menu Endpoints ---
+
+// GET /api/vendors/:vendorId/menu — public (optional auth)
+app.get('/api/vendors/:vendorId/menu', (req, res) => {
+  const items = db.prepare('SELECT * FROM food_menu_items WHERE vendor_id = ? ORDER BY name').all(req.params.vendorId);
+  res.json(items);
+});
+
+// POST /api/vendors/:vendorId/menu — admin or foodvendor
+app.post('/api/vendors/:vendorId/menu', (req, res) => {
+  const authUser = getUserFromRequest(req);
+  if (!authUser || (authUser.role !== 'admin' && authUser.role !== 'foodvendor')) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const vendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (authUser.role === 'foodvendor' && vendor.owner_username !== authUser.username) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const { name, price, description, image } = req.body;
+  if (!name || price == null) return res.status(400).json({ error: 'name and price required' });
+  const id = crypto.randomUUID();
+  db.prepare('INSERT INTO food_menu_items (id, vendor_id, name, price, description, image) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(id, req.params.vendorId, name, price, description || null, image || null);
+  const created = db.prepare('SELECT * FROM food_menu_items WHERE id = ?').get(id);
+  res.status(201).json(created);
+});
+
+// PUT /api/vendors/:vendorId/menu/:itemId — admin or owning foodvendor
+app.put('/api/vendors/:vendorId/menu/:itemId', (req, res) => {
+  const authUser = getUserFromRequest(req);
+  if (!authUser || (authUser.role !== 'admin' && authUser.role !== 'foodvendor')) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const vendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (authUser.role === 'foodvendor' && vendor.owner_username !== authUser.username) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const item = db.prepare('SELECT * FROM food_menu_items WHERE id = ? AND vendor_id = ?').get(req.params.itemId, req.params.vendorId) as any;
+  if (!item) return res.status(404).json({ error: 'Menu item not found' });
+  const { name, price, description, image } = req.body;
+  db.prepare('UPDATE food_menu_items SET name = ?, price = ?, description = ?, image = ? WHERE id = ?')
+    .run(name, price, description || null, image || null, req.params.itemId);
+  const updated = db.prepare('SELECT * FROM food_menu_items WHERE id = ?').get(req.params.itemId);
+  res.json(updated);
+});
+
+// DELETE /api/vendors/:vendorId/menu/:itemId — admin or owning foodvendor
+app.delete('/api/vendors/:vendorId/menu/:itemId', (req, res) => {
+  const authUser = getUserFromRequest(req);
+  if (!authUser || (authUser.role !== 'admin' && authUser.role !== 'foodvendor')) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const vendor = db.prepare('SELECT * FROM vendors WHERE id = ?').get(req.params.vendorId) as any;
+  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (authUser.role === 'foodvendor' && vendor.owner_username !== authUser.username) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  const item = db.prepare('SELECT * FROM food_menu_items WHERE id = ? AND vendor_id = ?').get(req.params.itemId, req.params.vendorId) as any;
+  if (!item) return res.status(404).json({ error: 'Menu item not found' });
+  db.prepare('DELETE FROM food_menu_items WHERE id = ?').run(req.params.itemId);
+  res.json({ success: true });
+});
+
+// GET /api/admin/menu — admin only
+app.get('/api/admin/menu', (req, res) => {
+  if (getRoleFromRequest(req) !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+  const rows = db.prepare(`
+    SELECT mi.*, v.name as vendor_name, s.name as street_name
+    FROM food_menu_items mi
+    JOIN vendors v ON mi.vendor_id = v.id
+    JOIN streets s ON v.street_id = s.id
+    ORDER BY v.name, mi.name
+  `).all();
+  const grouped: Record<string, any> = {};
+  for (const row of rows as any[]) {
+    if (!grouped[row.vendor_id]) {
+      grouped[row.vendor_id] = {
+        vendor_id: row.vendor_id,
+        vendor_name: row.vendor_name,
+        street_name: row.street_name,
+        items: [],
+      };
+    }
+    grouped[row.vendor_id].items.push({
+      id: row.id,
+      name: row.name,
+      price: row.price,
+      description: row.description,
+      image: row.image,
+    });
+  }
+  res.json(Object.values(grouped));
+});
+
+// Seed sample menu items
+const menuCount = (db.prepare('SELECT COUNT(*) as count FROM food_menu_items').get() as { count: number }).count;
+if (menuCount === 0) {
+  const insertMenuItem = db.prepare('INSERT INTO food_menu_items (id, vendor_id, name, price, description, image) VALUES (?, ?, ?, ?, ?, ?)');
+  // Pad Thai Master (v1)
+  insertMenuItem.run(crypto.randomUUID(), 'v1', 'Pad Thai', 4.50, 'Stir-fried rice noodles with shrimp, tofu, peanuts, and tamarind sauce', 'https://picsum.photos/seed/menu1/400/300');
+  insertMenuItem.run(crypto.randomUUID(), 'v1', 'Tom Yum Soup', 5.00, 'Hot and sour Thai soup with shrimp, mushrooms, and lemongrass', 'https://picsum.photos/seed/menu2/400/300');
+  insertMenuItem.run(crypto.randomUUID(), 'v1', 'Green Curry', 5.50, 'Coconut-based curry with chicken, Thai basil, and vegetables', 'https://picsum.photos/seed/menu3/400/300');
+  // Mango Sticky Rice (v2)
+  insertMenuItem.run(crypto.randomUUID(), 'v2', 'Mango Sticky Rice', 4.00, 'Sweet glutinous rice with ripe mango and coconut cream', 'https://picsum.photos/seed/menu4/400/300');
+  insertMenuItem.run(crypto.randomUUID(), 'v2', 'Coconut Ice Cream', 3.00, 'Creamy coconut ice cream served in a coconut shell', 'https://picsum.photos/seed/menu5/400/300');
+  insertMenuItem.run(crypto.randomUUID(), 'v2', 'Thai Iced Tea', 2.50, 'Sweet and creamy Thai iced tea with condensed milk', null);
+}
 
 // --- Static Map Serving ---
 const mapsDir = path.join(process.cwd(), 'static', 'maps');

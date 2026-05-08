@@ -31,6 +31,15 @@ export interface User {
   created_at: string;
 }
 
+export interface FoodMenuItem {
+  id: string;
+  vendor_id: string;
+  name: string;
+  price: number;
+  description: string | null;
+  image: string | null;
+}
+
 export interface Vendor {
   id: string;
   street_id: string;

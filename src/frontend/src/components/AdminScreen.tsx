@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, LayoutDashboard, Users, Store, MessageSquare, Plus } from 'lucide-react';
+import { ArrowLeft, LayoutDashboard, Users, Store, MessageSquare, UtensilsCrossed, Plus } from 'lucide-react';
 import { CurrentUser } from '../types';
 import AdminDashboard from './AdminDashboard';
 import AdminUsersTab from './AdminUsersTab';
 import AdminVendorsTab from './AdminVendorsTab';
 import AdminCommentsTab from './AdminCommentsTab';
+import AdminMenuTab from './AdminMenuTab';
 import { useLanguage } from '../i18n/context';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   authHeaders: () => Record<string, string>;
 }
 
-type Tab = 'dashboard' | 'users' | 'vendors' | 'comments';
+type Tab = 'dashboard' | 'users' | 'vendors' | 'comments' | 'menu';
 
 export default function AdminScreen({ currentUser, onBack, authHeaders }: Props) {
   const { t } = useLanguage();
@@ -25,6 +26,7 @@ export default function AdminScreen({ currentUser, onBack, authHeaders }: Props)
     { id: 'users', label: t.users, icon: Users },
     { id: 'vendors', label: t.vendors, icon: Store },
     { id: 'comments', label: t.comments, icon: MessageSquare },
+    { id: 'menu', label: t.menuTab, icon: UtensilsCrossed },
   ];
 
   const initial = currentUser?.username?.[0]?.toUpperCase() ?? 'A';
@@ -120,6 +122,7 @@ export default function AdminScreen({ currentUser, onBack, authHeaders }: Props)
           {activeTab === 'users' && <AdminUsersTab authHeaders={authHeaders} currentUser={currentUser} />}
           {activeTab === 'vendors' && <AdminVendorsTab authHeaders={authHeaders} />}
           {activeTab === 'comments' && <AdminCommentsTab authHeaders={authHeaders} />}
+          {activeTab === 'menu' && <AdminMenuTab authHeaders={authHeaders} />}
         </div>
       </div>
     </motion.div>

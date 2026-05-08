@@ -47,6 +47,7 @@ class FoodVendor(Base):
 
     street = relationship("FoodStreet", back_populates="vendors")
     comments = relationship("FoodComment", back_populates="vendor", cascade="all, delete-orphan")
+    menu_items = relationship("FoodMenuItem", back_populates="vendor", cascade="all, delete-orphan")
 
 
 class AppUser(Base):
@@ -70,6 +71,19 @@ class FoodComment(Base):
     created_at = Column(String)
 
     vendor = relationship("FoodVendor", back_populates="comments")
+
+
+class FoodMenuItem(Base):
+    __tablename__ = "food_menu_items"
+
+    id = Column(String, primary_key=True, index=True)
+    vendor_id = Column(String, ForeignKey("food_vendors.id", ondelete="CASCADE"))
+    name = Column(String)
+    price = Column(Float)
+    description = Column(Text, nullable=True)
+    image = Column(Text, nullable=True)
+
+    vendor = relationship("FoodVendor", back_populates="menu_items")
 
 
 # Finalize schema after all models are defined

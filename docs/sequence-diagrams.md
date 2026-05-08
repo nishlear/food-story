@@ -471,7 +471,82 @@ sequenceDiagram
     App-->>G: Show map screen (vendor bottom sheet now shows rate form)
 ```
 
-## 20. GPS User Location Display
+## 21. Show Food Menu
+
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant VBS as VendorBottomSheet
+    participant FMM as FoodMenuModal
+    participant API as Backend API
+
+    U->>VBS: Tap vendor pin
+    VBS-->>U: Show bottom sheet with "Show Food Menu" button
+
+    U->>VBS: Tap "Show Food Menu"
+    VBS->>VBS: setIsMenuOpen(true)
+    VBS-->>FMM: Render FoodMenuModal (isOpen=true)
+
+    FMM->>API: GET /api/vendors/{vendorId}/menu
+    alt menu items exist
+        API-->>FMM: [{id, name, price, description, image}, ...]
+        FMM-->>U: Show menu item cards (name, price, description)
+    else no items
+        API-->>FMM: []
+        FMM-->>U: Show empty state ("No menu items yet")
+    end
+
+    U->>FMM: Tap backdrop or X button
+    FMM->>VBS: onClose()
+    VBS->>VBS: setIsMenuOpen(false)
+```
+
+## 22. Admin Menu Management
+
+```mermaid
+sequenceDiagram
+    actor A as Admin
+    participant AS as AdminScreen
+    participant AMT as AdminMenuTab
+    participant API as Backend API
+
+    A->>AS: Click "Menu" tab
+    AS-->>AMT: Render AdminMenuTab
+    AMT->>API: GET /api/admin/menu
+    API-->>AMT: [{vendor_id, vendor_name, street_name, items: [...]}]
+    AMT-->>A: Show grouped vendor menu cards
+
+    alt Add menu item
+        A->>AMT: Click "+ Add" on vendor card
+        AMT-->>A: Show inline form
+        A->>AMT: Fill name, price, description, image
+        A->>AMT: Click "Save"
+        AMT->>API: POST /api/vendors/{vendorId}/menu
+        API-->>AMT: 201 Created
+        AMT->>API: GET /api/admin/menu (refresh)
+    end
+
+    alt Edit menu item
+        A->>AMT: Click edit icon on item
+        AMT-->>A: Show inline edit form
+        A->>AMT: Modify fields
+        A->>AMT: Click "Save"
+        AMT->>API: PUT /api/vendors/{vendorId}/menu/{itemId}
+        API-->>AMT: 200 OK
+        AMT->>API: GET /api/admin/menu (refresh)
+    end
+
+    alt Delete menu item
+        A->>AMT: Click delete icon on item
+        AMT-->>A: Confirm dialog
+        A->>AMT: Confirm
+        AMT->>API: DELETE /api/vendors/{vendorId}/menu/{itemId}
+        API-->>AMT: 204 No Content
+        AMT->>API: GET /api/admin/menu (refresh)
+    end
+```
+
+## 23. GPS User Location Display
 
 ```mermaid
 sequenceDiagram

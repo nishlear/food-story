@@ -395,7 +395,6 @@ export default function App() {
       <VendorBottomSheet
         vendor={selectedVendor}
         onClose={() => setSelectedVendor(null)}
-        onShare={() => showToast(t.linkCopied)}
         currentUser={currentUser}
         authHeaders={authHeaders}
         hasMap={!!(selectedLocation?.map_image_path &&

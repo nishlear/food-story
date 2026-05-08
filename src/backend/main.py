@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 import models  # noqa: F401 — import triggers DB create_all and user seeding
 from audio import _audio_dir, _scan_and_generate_missing_audio
 from config import MAPS_DIR
-from routers import admin, auth, comments, streets, vendors
+from routers import admin, auth, comments, menu, streets, vendors
 
 app = FastAPI(title="Street Food Audio Guide API", redirect_slashes=False)
 
@@ -31,6 +31,7 @@ app.include_router(streets.router)
 app.include_router(vendors.router)
 app.include_router(comments.router)
 app.include_router(admin.router)
+app.include_router(menu.router)
 
 
 @app.on_event("startup")

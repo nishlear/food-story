@@ -21,6 +21,7 @@ _MIGRATIONS = [
     "ALTER TABLE food_streets ADD COLUMN map_updated_at TEXT",
     "ALTER TABLE food_vendors ADD COLUMN lat FLOAT",
     "ALTER TABLE food_vendors ADD COLUMN lon FLOAT",
+    "CREATE TABLE IF NOT EXISTS food_menu_items (id TEXT PRIMARY KEY, vendor_id TEXT REFERENCES food_vendors(id) ON DELETE CASCADE, name TEXT, price FLOAT, description TEXT, image TEXT)",
 ]
 
 with engine.connect() as _conn:
